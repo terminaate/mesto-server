@@ -43,4 +43,12 @@ export class AuthService {
     const userTokens = await this.usersService.generateUserTokens(newUser.id, true);
     return { ...userTokens, user: new UserDto(newUser) };
   }
+
+  async refresh(refreshToken: string) {
+    const userTokens = await this.usersService.refreshUserTokens(refreshToken);
+    if (!userTokens) {
+      throw new HttpException(ApiExceptions.UserNotExist(), HttpStatus.BAD_REQUEST);
+    }
+    return userTokens;
+  }
 }

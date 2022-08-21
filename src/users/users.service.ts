@@ -15,6 +15,10 @@ export class UsersService {
   ) {
   }
 
+  async createNewUser(user: User) {
+    return await this.usersModel.create(user);
+  }
+
   async findUserByFilter(filter: { [key: string]: any }): Promise<UserDocument> {
     return this.usersModel.findOne(filter);
   }
@@ -23,17 +27,17 @@ export class UsersService {
     return this.usersTokensModel.findOne({ userId });
   }
 
-  async refreshUserTokens(userId: string, refreshToken: string) {
-
-  }
-
-  async createNewUser(user: User) {
-    return await this.usersModel.create(user);
+  async refreshUserTokens(refreshToken: string) {
+    const userTokens = await this.usersTokensModel.findOne({ refreshToken });
+    if (!userTokens) {
+      return null;
+    }
+    return await this.generateUserTokens(userTokens.userId, true);
   }
 
   async generateUserTokens(userId: string, save = false): Promise<{ accessToken: string, refreshToken: string }> {
     const accessToken = this.jwtService.sign({ id: userId }, {
-      expiresIn: '1h',
+      expiresIn: '30m',
       secret: process.env.JWT_ACCESS_SECRET,
     });
     const refreshToken = this.jwtService.sign({ id: userId }, {
