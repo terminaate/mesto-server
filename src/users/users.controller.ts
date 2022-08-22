@@ -1,8 +1,10 @@
 import { Controller, Get, Param, Req, UseGuards } from '@nestjs/common';
 import UsersService from './users.service';
-import JwtAuthGuard, { UserRequest } from '../auth/jwt/jwt-auth.guard';
+import JwtAuthGuard, { UserRequest } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import Roles from '../auth/guards/roles.decorator';
 
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('users')
 class UsersController {
 
@@ -13,7 +15,6 @@ class UsersController {
 
   @Get('/:id')
   async getUserById(@Req() req: UserRequest, @Param('id') id) {
-    console.log(req.user);
     return this.usersService.getUserByIdent(id === '@me' ? req.user.id : id);
   }
 }

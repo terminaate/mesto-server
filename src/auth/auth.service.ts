@@ -55,6 +55,7 @@ class AuthService {
       email: userDto.email ?? null,
       bio: userDto.bio ?? null,
       password: hashedPassword,
+      roles: ["USER"]
     });
     const userTokens = await this.usersService.generateUserTokens(
       newUser.id,

@@ -2,7 +2,7 @@ import { Document, Types } from 'mongoose';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
 @Schema()
-class UserTokens {
+class UserToken {
   @Prop({ type: Types.ObjectId, required: true, ref: 'User', unique: true })
   userId: string;
 
@@ -13,8 +13,8 @@ class UserTokens {
   refreshToken: string;
 }
 
-export type UserTokensDocument = UserTokens & Document;
+export type UserTokenDocument = UserToken & Document;
 
-export const UserTokensSchema = SchemaFactory.createForClass(UserTokens);
+export const UserTokenSchema = SchemaFactory.createForClass(UserToken);
 
-export default UserTokens;
+export default UserToken;

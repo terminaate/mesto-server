@@ -14,6 +14,9 @@ class User {
 
   @Prop({ type: String, required: true })
   password: string;
+
+  @Prop({ type: Array, required: true })
+  roles: string[];
 }
 
 export type UserDocument = User & Document;

@@ -2,7 +2,7 @@ import { HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import User, { UserDocument } from './models/users.model';
 import { Model, Types } from 'mongoose';
-import UserTokens, { UserTokensDocument } from './models/user-tokens.model';
+import UserToken, { UserTokenDocument } from './models/users-tokens.model';
 import { JwtService } from '@nestjs/jwt';
 import ApiExceptions from '../exceptions/api.exceptions';
 import UserDto from './dto/user.dto';
@@ -12,8 +12,7 @@ import CustomHttpException from '../exceptions/custom-http.exception';
 class UsersService {
   constructor(
     @InjectModel(User.name) private usersModel: Model<UserDocument>,
-    @InjectModel(UserTokens.name)
-    private usersTokensModel: Model<UserTokensDocument>,
+    @InjectModel(UserToken.name) private usersTokensModel: Model<UserTokenDocument>,
     private jwtService: JwtService,
   ) {
   }
@@ -28,7 +27,7 @@ class UsersService {
     return this.usersModel.findOne(filter);
   }
 
-  async findUserTokens(userId: string): Promise<UserTokensDocument> {
+  async findUserTokens(userId: string): Promise<UserTokenDocument> {
     return this.usersTokensModel.findOne({ userId });
   }
 
