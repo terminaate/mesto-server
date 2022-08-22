@@ -18,9 +18,12 @@ class ApiExceptions {
   }
 
   public static WrongAuthData(): string {
-    return this.NewException('Wrong login or password.');
+    return this.NewException('Wrong email or username or password.');
   }
 
+  public static UserIdNotExist(): string {
+    return this.NewException('User with this id not exist');
+  }
 }
 
 export default ApiExceptions;

@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
-import { UsersController } from './users.controller';
-import { UsersService } from './users.service';
+import UsersController from './users.controller';
+import UsersService from './users.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import User, { UserSchema } from './models/users.model';
 import UserTokens, { UserTokensSchema } from './models/user-tokens.model';
@@ -18,5 +18,6 @@ import { JwtModule } from '@nestjs/jwt';
   providers: [UsersService],
   exports: [UsersService],
 })
-export class UsersModule {
-}
+class UsersModule {}
+
+export default UsersModule;

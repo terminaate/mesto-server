@@ -3,7 +3,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
 @Schema()
 class User {
-  @Prop({ type: String, required: false, unique: true })
+  @Prop({ type: String, required: false })
   email?: string;
 
   @Prop({ type: String, required: true })
