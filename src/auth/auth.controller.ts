@@ -1,7 +1,8 @@
-import { Body, Controller, Post, Res } from '@nestjs/common';
-import AuthUserDto from './dto/auth-user.dto';
+import { Body, Controller, Post, Req, Res } from '@nestjs/common';
+import RegisterUserDto from './dto/register-user.dto';
 import AuthService from './auth.service';
-import { Response } from 'express';
+import { Request, Response } from 'express';
+import LoginUserDto from './dto/login-user.dto';
 
 @Controller('auth')
 class AuthController {
@@ -9,13 +10,13 @@ class AuthController {
   }
 
   @Post('login')
-  async login(@Body() userDto: AuthUserDto, @Res() res: Response) {
+  async login(@Body() userDto: LoginUserDto, @Res({ passthrough: true }) res: Response) {
     const {
       accessToken,
       refreshToken,
       user: newUser,
     } = await this.authService.login(
-      userDto.username ? userDto.username : userDto.email,
+      userDto.login ? userDto.login : userDto.email,
       userDto.password,
     );
     res.cookie('refreshToken', refreshToken, { httpOnly: true });
@@ -23,7 +24,7 @@ class AuthController {
   }
 
   @Post('register')
-  async register(@Body() userDto: AuthUserDto, @Res() res: Response) {
+  async register(@Body() userDto: RegisterUserDto, @Res({ passthrough: true }) res: Response) {
     const {
       accessToken,
       refreshToken,
@@ -34,7 +35,8 @@ class AuthController {
   }
 
   @Post('refresh')
-  async refresh(@Body('refreshToken') refreshToken: string, @Res() res: Response) {
+  async refresh(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
+    const { refreshToken } = req.cookies;
     const {
       accessToken: newAccessToken,
       refreshToken: newRefreshToken,

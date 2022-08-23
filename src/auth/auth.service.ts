@@ -1,5 +1,5 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
-import AuthUserDto from './dto/auth-user.dto';
+import RegisterUserDto from './dto/register-user.dto';
 import UsersService from '../users/users.service';
 import * as argon2 from 'argon2';
 import UserDto from '../users/dto/user.dto';
@@ -38,12 +38,12 @@ class AuthService {
     return { ...userTokens, user: new UserDto(candidate) };
   }
 
-  async register(userDto: AuthUserDto) {
+  async register(userDto: RegisterUserDto) {
     const candidate = await this.usersService.findUserByFilter({
-      username: userDto.username,
-      email: userDto.email,
+      login: userDto.login, email: userDto.email,
     });
     if (candidate) {
+      console.log('MATCHED');
       throw new CustomHttpException(
         ApiExceptions.UserAlreadyExist(),
         HttpStatus.BAD_REQUEST,
@@ -51,11 +51,11 @@ class AuthService {
     }
     const hashedPassword = await argon2.hash(userDto.password);
     const newUser = await this.usersService.createNewUser({
-      username: userDto.username,
+      login: userDto.login,
+      username: userDto.login,
       email: userDto.email ?? null,
-      bio: userDto.bio ?? null,
       password: hashedPassword,
-      roles: ["USER"]
+      roles: ['USER'],
     });
     const userTokens = await this.usersService.generateUserTokens(
       newUser.id,

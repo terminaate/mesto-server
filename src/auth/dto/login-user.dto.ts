@@ -1,23 +1,19 @@
 import { IsEmail, IsNotEmpty, IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
 
-class AuthUserDto {
+class LoginUserDto {
+  @IsOptional()
   @IsString()
   @MinLength(4)
   @MaxLength(20)
-  username: string;
+  login?: string;
 
   @IsOptional()
   @IsEmail()
   email?: string;
 
-  @IsOptional()
-  @IsString()
-  @MinLength(1)
-  @MaxLength(20)
-  bio?: string;
-
   @IsNotEmpty()
+  @MinLength(7)
   password: string;
 }
 
-export default AuthUserDto;
+export default LoginUserDto;
