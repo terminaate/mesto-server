@@ -5,6 +5,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import User, { UserSchema } from './models/users.model';
 import UserToken, { UserTokenSchema } from './models/users-tokens.model';
 import { JwtModule } from '@nestjs/jwt';
+import FilesModule from '../files/files.module';
 
 @Module({
   imports: [
@@ -13,12 +14,14 @@ import { JwtModule } from '@nestjs/jwt';
       { name: UserToken.name, schema: UserTokenSchema },
     ]),
     JwtModule.register({}),
+    FilesModule,
   ],
   controllers: [UsersController],
   providers: [UsersService],
   exports: [UsersService],
 })
 class UsersModule {
+
 }
 
 export default UsersModule;

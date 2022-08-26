@@ -22,7 +22,23 @@ class ApiExceptions {
   }
 
   public static UserIdNotExist(): string {
-    return this.NewException('User with this id not exist');
+    return this.NewException('User with this id not exist.');
+  }
+
+  public static RoleAlreadyExit(): string {
+    return this.NewException('Role with this value already exist.');
+  }
+
+  public static RoleValueEmpty(): string {
+    return this.NewException('Can\'t find value in body.');
+  }
+
+  public static AvatarNotBase64(): string {
+    return this.NewException('Avatar is not base64.');
+  }
+
+  public static TooLargeAvatarSize(): string {
+    return this.NewException('Too large avatar size.');
   }
 }
 

@@ -1,4 +1,4 @@
-import { Document } from 'mongoose';
+import { Document, Types } from 'mongoose';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
 @Schema()
@@ -13,12 +13,15 @@ class User {
   username: string;
 
   @Prop({ type: String })
+  avatar?: string;
+
+  @Prop({ type: String })
   bio?: string;
 
   @Prop({ type: String, required: true })
   password: string;
 
-  @Prop({ type: Array, required: true })
+  @Prop({ type: [{ type: Types.ObjectId, required: true, ref: 'Role' }], required: true })
   roles: string[];
 }
 

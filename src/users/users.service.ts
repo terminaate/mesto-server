@@ -7,6 +7,8 @@ import { JwtService } from '@nestjs/jwt';
 import ApiExceptions from '../exceptions/api.exceptions';
 import UserDto from './dto/user.dto';
 import CustomHttpException from '../exceptions/custom-http.exception';
+import PatchUserDto from './dto/patch-user.dto';
+import FilesService from '../files/files.service';
 
 @Injectable()
 class UsersService {
@@ -14,6 +16,7 @@ class UsersService {
     @InjectModel(User.name) private usersModel: Model<UserDocument>,
     @InjectModel(UserToken.name) private usersTokensModel: Model<UserTokenDocument>,
     private jwtService: JwtService,
+    private filesService: FilesService,
   ) {
   }
 
@@ -21,9 +24,7 @@ class UsersService {
     return await this.usersModel.create(user);
   }
 
-  async findUserByFilter(filter: {
-    [key: string]: any;
-  }): Promise<UserDocument> {
+  async findUserByFilter(filter: Record<string, any>): Promise<UserDocument> {
     return this.usersModel.findOne(filter);
   }
 
@@ -43,14 +44,14 @@ class UsersService {
     const accessToken = this.jwtService.sign(
       { id: userId },
       {
-        expiresIn: '30m',
+        expiresIn: '1d',
         secret: process.env.JWT_ACCESS_SECRET,
       },
     );
     const refreshToken = this.jwtService.sign(
       { id: userId },
       {
-        expiresIn: '1d',
+        expiresIn: '30d',
         secret: process.env.JWT_REFRESH_SECRET,
       },
     );
@@ -81,6 +82,43 @@ class UsersService {
       throw new CustomHttpException(ApiExceptions.UserNotExist(), HttpStatus.BAD_REQUEST);
     }
     return new UserDto(user);
+  }
+
+  async patchUser(userId: string, { username, bio, email, login, avatar }: PatchUserDto) {
+    const user = await this.usersModel.findById(userId);
+    if (!user) {
+      throw new CustomHttpException(
+        ApiExceptions.UserNotExist(),
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const avatarSize = this.filesService.getFileSize(avatar);
+
+    if (!this.filesService.isStringBase64(avatar) || avatarSize === 'n/a') {
+      throw new CustomHttpException(
+        ApiExceptions.AvatarNotBase64(),
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    if (!Object.values(avatarSize).includes('gb') && !Object.values(avatarSize).includes('tb')) {
+      this.filesService.writeUserAvatar(userId, avatar);
+    } else {
+      console.log(avatarSize);
+      throw new CustomHttpException(
+        ApiExceptions.TooLargeAvatarSize(),
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const updatedFileds: PatchUserDto = {};
+
+    // for (let i of user) {
+    //
+    // }
+
+    return null;
   }
 }
 
