@@ -44,14 +44,14 @@ class UsersService {
     const accessToken = this.jwtService.sign(
       { id: userId },
       {
-        expiresIn: '1d',
+        expiresIn: '1h',
         secret: process.env.JWT_ACCESS_SECRET,
       },
     );
     const refreshToken = this.jwtService.sign(
       { id: userId },
       {
-        expiresIn: '30d',
+        expiresIn: '1d',
         secret: process.env.JWT_REFRESH_SECRET,
       },
     );
