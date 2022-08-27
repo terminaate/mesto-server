@@ -19,7 +19,6 @@ class ServeStaticService {
     const path = resolvePath(__dirname, `../static/${fileSplitPath.slice(0, -1).join("/")}/`);
     try {
       const findedFile = fs.readdirSync(path).filter(v => v.includes(fileName))[0]
-      console.log(findedFile, path + findedFile)
       const buffer = fs.readFileSync(path + `/${findedFile}`);
       const type = `image/${findedFile.split(".")[1]}`;
       return { buffer, type };

@@ -13,9 +13,6 @@ class User {
   username: string;
 
   @Prop({ type: String })
-  avatar?: string;
-
-  @Prop({ type: String })
   bio?: string;
 
   @Prop({ type: String, required: true })

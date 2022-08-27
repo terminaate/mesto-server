@@ -16,7 +16,7 @@ class UsersController {
 
   @Get('/:id')
   async getUserById(@Req() req: UserRequest, @Param('id') id: string) {
-    return this.usersService.getUserByIdent(id === '@me' ? req.user.id : id);
+    return this.usersService.getUserByIdent(id === '@me' ? req.user.id : id, id === '@me');
   }
 
   @Patch('/@me')

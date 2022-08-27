@@ -72,7 +72,9 @@ class UsersService {
     return { accessToken, refreshToken };
   }
 
-  async getUserByIdent(ident: string) {
+  async getUserByIdent(ident: string, isSelfUser: boolean) {
+    // TODO
+    // hide user email from other users
     const filter: { $or: { [key: string]: string }[] } = { $or: [{ username: ident }] };
     if (Types.ObjectId.isValid(ident)) {
       filter.$or.push({ _id: ident });
@@ -81,7 +83,7 @@ class UsersService {
     if (!user) {
       throw new CustomHttpException(ApiExceptions.UserNotExist(), HttpStatus.BAD_REQUEST);
     }
-    return new UserDto(user);
+    return new UserDto(user, isSelfUser);
   }
 
   async patchUser(userId: string, { avatar, bio, password, username, email, login }: PatchUserDto) {
