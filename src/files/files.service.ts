@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import * as fs from 'fs';
 import * as path from 'path';
 
-
 @Injectable()
 class FilesService {
   private readonly rootPath: string = path.resolve(__dirname, '../');
@@ -26,7 +25,7 @@ class FilesService {
     }
   }
 
-  public createNewUserFolder(userId: string) {
+  createNewUserFolder(userId: string) {
     const userPath = this.rootPath + `/static/${userId}`;
     fs.mkdir(userPath, () => {
     });
@@ -48,20 +47,17 @@ class FilesService {
     return { [sizes[i]]: (bytes / Math.pow(1024, i)).toFixed(1) };
   }
 
-  private static getFileExt(imageBase: string) {
+  getFileExt(imageBase: string) {
     return imageBase.substring('data:'.length, imageBase.indexOf(';base64'));
   }
 
   private static decodeBase64(dataString: string) {
     const matches = dataString.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
-    if (!matches) {
+    if (!matches || matches.length !== 3) {
       return null;
     }
-    const response: any = {};
 
-    if (matches.length !== 3) {
-      return new Error('Invalid input string');
-    }
+    const response: { data: Buffer, type: string } = {} as { data: Buffer, type: string };
 
     response.type = matches[1];
     response.data = Buffer.from(matches[2], 'base64');
@@ -77,13 +73,16 @@ class FilesService {
   }
 
   public writeUserAvatar(userId: string, imageBase: string) {
-    const userDir = fs.readdirSync(this.rootPath + `/static/${userId}`);
-    if (userDir.some(v => v.includes('avatar'))) {
-      fs.rm(this.rootPath + `/static/${userId}/${userDir.find(v => v.includes('avatar'))}`, () => {
-      });
-    }
+    this.createNewUserFolder(userId);
+    fs.readdir(this.rootPath + `/static/${userId}`, (_, data) => {
+      if (data.some(v => v.includes('avatar'))) {
+        fs.rm(this.rootPath + `/static/${userId}/${data.find(v => v.includes('avatar'))}`, () => {
+        });
+      }
+    });
 
-    const fileExt = FilesService.getFileExt(imageBase).split('/');
+
+    const fileExt = this.getFileExt(imageBase).split('/');
     if (fileExt[0] !== 'image') {
       return;
     }

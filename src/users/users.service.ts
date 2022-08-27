@@ -84,7 +84,7 @@ class UsersService {
     return new UserDto(user);
   }
 
-  async patchUser(userId: string, { username, bio, email, login, avatar }: PatchUserDto) {
+  async patchUser(userId: string, { avatar, bio, password, username, email, login }: PatchUserDto) {
     const user = await this.usersModel.findById(userId);
     if (!user) {
       throw new CustomHttpException(
@@ -93,32 +93,46 @@ class UsersService {
       );
     }
 
-    const avatarSize = this.filesService.getFileSize(avatar);
+    if (avatar) {
+      const avatarSize = this.filesService.getFileSize(avatar);
+      const avatarExt = this.filesService.getFileExt(avatar).split('/');
 
-    if (!this.filesService.isStringBase64(avatar) || avatarSize === 'n/a') {
-      throw new CustomHttpException(
-        ApiExceptions.AvatarNotBase64(),
-        HttpStatus.BAD_REQUEST,
-      );
+      if (avatarExt[0] !== 'image' || !this.filesService.isStringBase64(avatar) || avatarSize === 'n/a') {
+        throw new CustomHttpException(
+          ApiExceptions.AvatarNotBase64(),
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
+      if (avatarExt[1] === 'gif') {
+        throw new CustomHttpException(
+          ApiExceptions.AvatarNotBase64(),
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
+      if (Object.keys(avatarSize).includes('kb') || (Object.keys(avatarSize).includes('mb') && avatarSize.mb < 5)) {
+        this.filesService.writeUserAvatar(userId, avatar);
+      } else {
+        throw new CustomHttpException(
+          ApiExceptions.TooLargeAvatarSize(),
+          HttpStatus.BAD_REQUEST,
+        );
+      }
     }
 
-    if (!Object.values(avatarSize).includes('gb') && !Object.values(avatarSize).includes('tb')) {
-      this.filesService.writeUserAvatar(userId, avatar);
-    } else {
-      console.log(avatarSize);
-      throw new CustomHttpException(
-        ApiExceptions.TooLargeAvatarSize(),
-        HttpStatus.BAD_REQUEST,
-      );
+    const updatedFields: PatchUserDto = {};
+    const newFields = { bio, password, username, email, login };
+
+    for (let i in newFields) {
+      if (newFields[i] && user[i] !== newFields[i]) {
+        updatedFields[i] = newFields[i];
+      }
     }
 
-    const updatedFileds: PatchUserDto = {};
 
-    // for (let i of user) {
-    //
-    // }
-
-    return null;
+    await user.update(updatedFields);
+    return {...new UserDto(user), ...updatedFields};
   }
 }
 

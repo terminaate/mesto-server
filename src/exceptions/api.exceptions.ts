@@ -40,6 +40,10 @@ class ApiExceptions {
   public static TooLargeAvatarSize(): string {
     return this.NewException('Too large avatar size.');
   }
+
+  public static FileNotFound(): string {
+    return this.NewException('File not found.');
+  }
 }
 
 export default ApiExceptions;
