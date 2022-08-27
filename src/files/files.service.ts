@@ -74,20 +74,19 @@ class FilesService {
 
   public writeUserAvatar(userId: string, imageBase: string) {
     this.createNewUserFolder(userId);
-    fs.readdir(this.rootPath + `/static/${userId}`, (_, data) => {
-      if (data.some(v => v.includes('avatar'))) {
-        fs.rm(this.rootPath + `/static/${userId}/${data.find(v => v.includes('avatar'))}`, () => {
-        });
-      }
-    });
-
 
     const fileExt = this.getFileExt(imageBase).split('/');
     if (fileExt[0] !== 'image') {
       return;
     }
-
     const decodedImage = FilesService.decodeBase64(imageBase);
+
+    fs.readdir(this.rootPath + `/static/${userId}`, (_, data) => {
+      if (data.some(v => v.includes('avatar') && v !== `avatar.${fileExt[1]}`)) {
+        fs.rm(this.rootPath + `/static/${userId}/${data.find(v => v.includes('avatar'))}`, () => {
+        });
+      }
+    });
 
     fs.writeFile(this.rootPath + `/static/${userId}/avatar.${fileExt[1]}`, decodedImage.data, () => {
     });
