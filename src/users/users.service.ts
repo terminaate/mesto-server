@@ -73,9 +73,7 @@ class UsersService {
   }
 
   async getUserByIdent(ident: string, isSelfUser: boolean) {
-    // TODO
-    // hide user email from other users
-    const filter: { $or: { [key: string]: string }[] } = { $or: [{ username: ident }] };
+    const filter: { $or: Record<string, string>[] } = { $or: [{ username: ident }] };
     if (Types.ObjectId.isValid(ident)) {
       filter.$or.push({ _id: ident });
     }
@@ -90,37 +88,18 @@ class UsersService {
     const user = await this.usersModel.findById(userId);
     if (!user) {
       throw new CustomHttpException(
-        ApiExceptions.UserNotExist(),
+        ApiExceptions.UserIdNotExist(),
         HttpStatus.BAD_REQUEST,
       );
     }
 
     if (avatar) {
-      const avatarSize = this.filesService.getFileSize(avatar);
-      const avatarExt = this.filesService.getFileExt(avatar).split('/');
-
-      if (avatarExt[0] !== 'image' || !this.filesService.isStringBase64(avatar) || avatarSize === 'n/a') {
-        throw new CustomHttpException(
-          ApiExceptions.AvatarNotBase64(),
-          HttpStatus.BAD_REQUEST,
-        );
-      }
-
-      if (avatarExt[1] === 'gif') {
-        throw new CustomHttpException(
-          ApiExceptions.AvatarNotBase64(),
-          HttpStatus.BAD_REQUEST,
-        );
-      }
-
-      if (Object.keys(avatarSize).includes('kb') || (Object.keys(avatarSize).includes('mb') && avatarSize.mb < 5)) {
+      const isAvatarValid = this.filesService.validateImage(avatar);
+      if (isAvatarValid) {
         this.filesService.writeUserAvatar(userId, avatar);
-      } else {
-        throw new CustomHttpException(
-          ApiExceptions.TooLargeAvatarSize(),
-          HttpStatus.BAD_REQUEST,
-        );
       }
+    } else if (avatar === null) {
+      this.filesService.deleteUserAvatar(userId);
     }
 
     const updatedFields: PatchUserDto = {};
@@ -132,9 +111,21 @@ class UsersService {
       }
     }
 
+    await user.updateOne(updatedFields);
+    return { ...new UserDto(user), ...updatedFields };
+  }
 
-    await user.update(updatedFields);
-    return {...new UserDto(user), ...updatedFields};
+  async deleteUser(userId: string) {
+    const user = await this.usersModel.findById(userId);
+    if (!user) {
+      throw new CustomHttpException(ApiExceptions.UserIdNotExist(), HttpStatus.NOT_FOUND);
+    }
+
+    await this.usersTokensModel.deleteOne({ userId });
+    await user.deleteOne();
+
+    this.filesService.deleteUserFolder(userId);
+    return new UserDto(user);
   }
 }
 

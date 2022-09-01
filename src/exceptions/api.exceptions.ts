@@ -33,16 +33,28 @@ class ApiExceptions {
     return this.NewException('Can\'t find value in body.');
   }
 
-  public static AvatarNotBase64(): string {
-    return this.NewException('Avatar is not base64.');
+  public static FileNotBase64(): string {
+    return this.NewException('File is not base64.');
   }
 
-  public static TooLargeAvatarSize(): string {
-    return this.NewException('Too large avatar size.');
+  public static TooLargeFileSize(): string {
+    return this.NewException('Too large file size. (max size is 5mb)');
   }
 
   public static FileNotFound(): string {
     return this.NewException('File not found.');
+  }
+
+  public static PostAlreadyExist(): string {
+    return this.NewException('Post already exist.');
+  }
+
+  public static PostNotExist(): string {
+    return this.NewException('Post not founded.');
+  }
+
+  public static FileNotValid(): string {
+    return this.NewException('File size or file type is not valid. (file is a base64 string and max size its a 5 mb)');
   }
 }
 

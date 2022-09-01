@@ -10,8 +10,7 @@ import ApiExceptions from '../exceptions/api.exceptions';
 class RolesService {
   constructor(
     @InjectModel(Role.name) private rolesModel: Model<RoleDocument>,
-  ) {
-  }
+  ) {}
 
   async getRoleByFilter(filter: { [key: string]: string } = { value: 'USER' }) {
     return this.rolesModel.findOne(filter);

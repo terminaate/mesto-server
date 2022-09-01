@@ -1,4 +1,4 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, HttpCode, HttpStatus, Post, UseGuards } from '@nestjs/common';
 import JwtAuthGuard from '../auth/guards/jwt-auth.guard';
 import RolesGuard from './roles.guard';
 import Roles from './roles.decorator';
@@ -16,6 +16,7 @@ class RolesController {
 
 
   @Roles('ADMIN')
+  @HttpCode(HttpStatus.CREATED)
   @Post('/')
   async newRole(@Body() createRoleDto: CreateRoleDto) {
     return this.rolesService.createRole(createRoleDto);

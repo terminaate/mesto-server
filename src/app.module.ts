@@ -6,6 +6,7 @@ import FilesModule from './files/files.module';
 import RolesModule from './roles/roles.module';
 import UsersModule from './users/users.module';
 // import { ServeStaticModule } from '@nestjs/serve-static';
+import { PostsModule } from './posts/posts.module';
 import ServeStaticModule from './serve-static/serve-static.module';
 
 @Module({
@@ -20,6 +21,7 @@ import ServeStaticModule from './serve-static/serve-static.module';
     UsersModule,
     FilesModule,
     RolesModule,
+    PostsModule,
   ],
 })
 export class AppModule {

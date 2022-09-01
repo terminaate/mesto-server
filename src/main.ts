@@ -1,13 +1,14 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { RequestMethod } from '@nestjs/common';
+import { RequestMethod, ValidationPipe } from '@nestjs/common';
 import * as cookieParser from 'cookie-parser';
 import { json, urlencoded } from 'express';
 
 async function bootstrap() {
   const PORT = process.env.PORT || 3000;
   const app = await NestFactory.create(AppModule, { cors: { origin: process.env.CLIENT_URL, credentials: true } });
-  // app.useGlobalPipes(new ValidationPipe());
+  // Use global validation
+  app.useGlobalPipes(new ValidationPipe());
   app.setGlobalPrefix('api', {
     exclude: [
       { path: '/static/:path*', method: RequestMethod.GET },
