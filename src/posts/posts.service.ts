@@ -27,10 +27,6 @@ export class PostsService {
       throw new CustomHttpException(ApiExceptions.UserIdNotExist(), HttpStatus.BAD_REQUEST);
     }
 
-    if (await this.postsModel.findOne({ userId: postDto.userId })) {
-      throw new CustomHttpException(ApiExceptions.PostAlreadyExist(), HttpStatus.BAD_REQUEST);
-    }
-
     this.filesService.validateImage(postDto.image);
 
     const { image, ...newPostDto } = postDto;
@@ -80,13 +76,13 @@ export class PostsService {
     if (!post) {
       throw new CustomHttpException(ApiExceptions.PostNotExist(), HttpStatus.BAD_REQUEST);
     }
-    return post;
+    return new PostDto(post);
   }
 
   async findUserPosts(userId: string) {
     if (!userId) {
       throw new CustomHttpException(ApiExceptions.UserNotExist(), HttpStatus.BAD_REQUEST);
     }
-    return this.postsModel.find({ userId });
+    return (await this.postsModel.find({ userId })).map(post => new PostDto(post));
   }
 }
