@@ -19,6 +19,9 @@ class RolesGuard implements CanActivate {
     const roles = await Promise.all(metaRoles.map(async role => (await this.rolesService.getRoleByFilter({ value: role })).id));
 
     const request = context.switchToHttp().getRequest();
+    if (!request.user) {
+      return true;
+    }
     const { roles: userRoles } = request.user;
 
     return roles.some(role => userRoles.includes(role));

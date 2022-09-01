@@ -71,4 +71,22 @@ export class PostsService {
     await post.updateOne(updatedFields);
     return { ...new PostDto(post), ...updatedFields };
   }
+
+  async findPostById(id: string) {
+    if (!id) {
+      throw new CustomHttpException(ApiExceptions.PostNotExist(), HttpStatus.BAD_REQUEST);
+    }
+    const post = this.postsModel.findById(id);
+    if (!post) {
+      throw new CustomHttpException(ApiExceptions.PostNotExist(), HttpStatus.BAD_REQUEST);
+    }
+    return post;
+  }
+
+  async findUserPosts(userId: string) {
+    if (!userId) {
+      throw new CustomHttpException(ApiExceptions.UserNotExist(), HttpStatus.BAD_REQUEST);
+    }
+    return this.postsModel.find({ userId });
+  }
 }

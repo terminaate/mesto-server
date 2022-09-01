@@ -1,4 +1,4 @@
-import { Body, Controller, HttpCode, HttpStatus, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import CreatePostDto from './dto/create-post.dto';
 import PatchPostDto from './dto/patch-post.dto';
@@ -23,5 +23,10 @@ export class PostsController {
   @Patch('/:id')
   async patchPost(@Req() req: UserRequest, @Param('id') id: string, @Body() postDto: PatchPostDto) {
     return this.postsService.patchPost(id, postDto, req.user);
+  }
+
+  @Get('/:id')
+  async getPost(@Param('id') id: string) {
+    return this.postsService.findPostById(id);
   }
 }

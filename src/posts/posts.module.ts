@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { PostsController } from './posts.controller';
 import { MongooseModule } from '@nestjs/mongoose';
@@ -10,7 +10,7 @@ import UsersModule from '../users/users.module';
   imports: [
     MongooseModule.forFeature([{ name: Post.name, schema: PostSchema }]),
     FilesModule,
-    UsersModule,
+    forwardRef(() => UsersModule),
   ],
   providers: [PostsService],
   controllers: [PostsController],

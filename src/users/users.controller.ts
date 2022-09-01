@@ -7,7 +7,7 @@ import {
   HttpStatus,
   Param,
   Patch,
-  Post,
+  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -16,6 +16,7 @@ import JwtAuthGuard, { UserRequest } from '../auth/guards/jwt-auth.guard';
 import RolesGuard from '../roles/roles.guard';
 import PatchUserDto from './dto/patch-user.dto';
 import Roles from '../roles/roles.decorator';
+import { PostsService } from '../posts/posts.service';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('users')
@@ -23,7 +24,13 @@ class UsersController {
 
   constructor(
     private usersService: UsersService,
+    private postsService: PostsService,
   ) {
+  }
+
+  @Get('search')
+  async searchUsers(@Query('username') username: string) {
+    return this.usersService.findUsersByFilter({ username });
   }
 
   @Get('/:id')
@@ -56,10 +63,10 @@ class UsersController {
     return this.usersService.deleteUser(id);
   }
 
-  // @Post("/@me/posts")
-  // async createNewSelfPost(postBody) {
-  //
-  // }
+  @Get('/:id/posts')
+  async getUserPosts(@Req() req: UserRequest, @Param('id') id: string) {
+    return this.postsService.findUserPosts(id === '@me' ? req.user.id : id);
+  }
 }
 
 export default UsersController;

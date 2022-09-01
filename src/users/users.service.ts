@@ -85,6 +85,12 @@ class UsersService {
   }
 
   async patchUser(userId: string, { avatar, bio, password, username, email, login }: PatchUserDto) {
+    if (!userId) {
+      throw new CustomHttpException(
+        ApiExceptions.UserIdNotExist(),
+        HttpStatus.BAD_REQUEST,
+      );
+    }
     const user = await this.usersModel.findById(userId);
     if (!user) {
       throw new CustomHttpException(
@@ -126,6 +132,13 @@ class UsersService {
 
     this.filesService.deleteUserFolder(userId);
     return new UserDto(user);
+  }
+
+  async findUsersByFilter(filter: Record<string, any>) {
+    if (Object.keys(filter).length <= 0) {
+      return [];
+    }
+    return (await this.usersModel.find(filter)).map(user => new UserDto(user));
   }
 }
 

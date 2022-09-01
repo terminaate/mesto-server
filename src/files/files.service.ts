@@ -73,7 +73,7 @@ class FilesService {
     const decodedImage = this.decodeBase64(image);
     const foundFile = this.findFileWithName(this.rootPath + path, fileName);
 
-    if (foundFile) {
+    if (foundFile && foundFile !== `${fileName}.${fileExt[1]}`) {
       fs.rm(this.rootPath + `${path}/${foundFile}`, () => {
       });
     }
