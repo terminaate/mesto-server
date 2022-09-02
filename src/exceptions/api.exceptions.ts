@@ -56,6 +56,10 @@ class ApiExceptions {
   public static FileNotValid(): string {
     return this.NewException('File size or file type is not valid. (file is a base64 string and max size its a 5 mb)');
   }
+
+  public static PostAlreadyLiked(): string {
+    return this.NewException('Post already liked.');
+  }
 }
 
 export default ApiExceptions;

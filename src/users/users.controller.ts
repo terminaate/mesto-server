@@ -30,7 +30,10 @@ class UsersController {
 
   @Get('search')
   async searchUsers(@Query('username') username: string) {
-    return this.usersService.findUsersByFilter({ username });
+    if (!username) {
+      return [];
+    }
+    return this.usersService.findUsersByFilter({ username: new RegExp(username, 'i') });
   }
 
   @Get('/:id')
@@ -65,7 +68,8 @@ class UsersController {
 
   @Get('/:id/posts')
   async getUserPosts(@Req() req: UserRequest, @Param('id') id: string) {
-    return this.postsService.findUserPosts(id === '@me' ? req.user.id : id);
+    const userId = (await this.usersService.getUserByIdent(id === '@me' ? req.user.id : id, false)).id;
+    return this.postsService.findUserPosts(id === '@me' ? req.user.id : userId);
   }
 }
 

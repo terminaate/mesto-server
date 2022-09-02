@@ -85,4 +85,33 @@ export class PostsService {
     }
     return (await this.postsModel.find({ userId })).map(post => new PostDto(post));
   }
+
+  async deletePost(postId: string, user: UserDocument) {
+    const post = await this.postsModel.findById(postId);
+    if (!post) {
+      throw new CustomHttpException(ApiExceptions.PostNotExist(), HttpStatus.BAD_REQUEST);
+    }
+
+    if (post.userId !== user.id && !user.roles.includes('ADMIN')) {
+      throw new ForbiddenException();
+    }
+
+    await post.deleteOne();
+    return new PostDto(post);
+  }
+
+  async likePost(postId: string, userId: string) {
+    const post = await this.postsModel.findById(postId);
+    if (!post) {
+      throw new CustomHttpException(ApiExceptions.PostNotExist(), HttpStatus.BAD_REQUEST);
+    }
+
+    if (post.likes.includes(userId)) {
+      post.likes = post.likes.filter(id => String(id) !== userId);
+    } else {
+      post.likes.push(userId);
+    }
+    await post.save();
+    return new PostDto(post);
+  }
 }

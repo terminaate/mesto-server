@@ -1,4 +1,16 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  Patch,
+  Post,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 import { PostsService } from './posts.service';
 import CreatePostDto from './dto/create-post.dto';
 import PatchPostDto from './dto/patch-post.dto';
@@ -21,12 +33,22 @@ export class PostsController {
 
   @HttpCode(HttpStatus.ACCEPTED)
   @Patch('/:id')
-  async patchPost(@Req() req: UserRequest, @Param('id') id: string, @Body() postDto: PatchPostDto) {
-    return this.postsService.patchPost(id, postDto, req.user);
+  async patchPost(@Req() { user }: UserRequest, @Param('id') id: string, @Body() postDto: PatchPostDto) {
+    return this.postsService.patchPost(id, postDto, user);
   }
 
   @Get('/:id')
   async getPost(@Param('id') id: string) {
     return this.postsService.findPostById(id);
+  }
+
+  @Delete('/:id')
+  async deletePost(@Req() { user }: UserRequest, @Param('id') id: string) {
+    return this.postsService.deletePost(id, user);
+  }
+
+  @Post('/:id/like')
+  async likePost(@Req() { user }: UserRequest, @Param('id') id: string) {
+    return this.postsService.likePost(id, user.id);
   }
 }

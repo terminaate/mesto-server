@@ -11,6 +11,9 @@ class Post {
 
   @Prop({ type: String, required: false })
   description: string;
+
+  @Prop({ type: [{ type: Types.ObjectId, ref: 'User', required: true }], required: true, default: [] })
+  likes: string[];
 }
 
 export type PostDocument = Post & Document;

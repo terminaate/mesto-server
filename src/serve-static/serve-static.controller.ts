@@ -15,6 +15,7 @@ class ServeStaticController {
     const file = this.serveStaticService.getFile(Object.values(req.params).reverse().join(''));
     res.setHeader('Content-Type', file.type);
     res.send(file.buffer);
+    res.end();
   }
 }
 
