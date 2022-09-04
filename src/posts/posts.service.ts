@@ -83,7 +83,7 @@ export class PostsService {
     if (!userId) {
       throw new CustomHttpException(ApiExceptions.UserNotExist(), HttpStatus.BAD_REQUEST);
     }
-    return (await this.postsModel.find({ userId })).map(post => new PostDto(post));
+    return (await this.postsModel.find({ userId })).map(post => new PostDto(post)).reverse();
   }
 
   async deletePost(postId: string, user: UserDocument) {
