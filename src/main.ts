@@ -9,11 +9,11 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule, { cors: { origin: process.env.CLIENT_URL, credentials: true } });
   // Use global validation
   app.useGlobalPipes(new ValidationPipe());
-  app.setGlobalPrefix('api', {
-    exclude: [
-      { path: '/static/:path*', method: RequestMethod.GET },
-    ],
-  });
+  // app.setGlobalPrefix('api', {
+  //   exclude: [
+  //     { path: '/static/:path*', method: RequestMethod.GET },
+  //   ],
+  // });
   app.use(cookieParser());
   app.use(json({ limit: '10mb' }));
   app.use(urlencoded({ extended: true, limit: '10mb' }));
