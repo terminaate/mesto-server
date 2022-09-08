@@ -51,7 +51,7 @@ class UsersService {
     const refreshToken = this.jwtService.sign(
       { id: userId },
       {
-        expiresIn: '4h',
+        expiresIn: '1d',
         secret: process.env.JWT_REFRESH_SECRET,
       },
     );
