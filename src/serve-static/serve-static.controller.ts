@@ -1,4 +1,4 @@
-import { Controller, Get, HttpStatus, Req, Res } from '@nestjs/common';
+import { Controller, Get, HttpStatus, Query, Req, Res } from '@nestjs/common';
 import { Request, Response } from 'express';
 import ServeStaticService from './serve-static.service';
 import CustomHttpException from '../exceptions/custom-http.exception';
@@ -13,8 +13,14 @@ class ServeStaticController {
   }
 
   @Get('/:path*')
-  getPath(@Res({ passthrough: true }) res: Response, @Req() req: Request) {
-    const file = this.serveStaticService.getFile(Object.values(req.params).reverse().join(''));
+  async getPath(@Res({ passthrough: true }) res: Response, @Req() req: Request, @Query('size') size: string) {
+    let file: { buffer: Buffer, type: string };
+
+    if (Number(size)) {
+      file = await this.serveStaticService.getFile(Object.values(req.params).reverse().join(''), Number(size));
+    } else {
+      file = await this.serveStaticService.getFile(Object.values(req.params).reverse().join(''));
+    }
 
     if (!file || !file.buffer || !file.type) {
       throw new CustomHttpException(ApiExceptions.FileNotFound(), HttpStatus.BAD_REQUEST);
