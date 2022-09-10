@@ -23,5 +23,4 @@ import ServeStaticModule from './serve-static/serve-static.module';
     PostsModule,
   ],
 })
-export class AppModule {
-}
+export class AppModule {}

@@ -21,24 +21,27 @@ import { PostsService } from '../posts/posts.service';
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('users')
 class UsersController {
-
   constructor(
     private usersService: UsersService,
     private postsService: PostsService,
-  ) {
-  }
+  ) {}
 
   @Get('search')
   async searchUsers(@Query('username') username: string) {
     if (!username) {
       return [];
     }
-    return this.usersService.findUsersByFilter({ username: new RegExp(username, 'i') });
+    return this.usersService.findUsersByFilter({
+      username: new RegExp(username, 'i'),
+    });
   }
 
   @Get('/:id')
   async getUserById(@Req() req: UserRequest, @Param('id') id: string) {
-    return this.usersService.getUserByIdent(id === '@me' ? req.user.id : id, id === '@me');
+    return this.usersService.getUserByIdent(
+      id === '@me' ? req.user.id : id,
+      id === '@me',
+    );
   }
 
   @Patch('/@me')
@@ -54,7 +57,6 @@ class UsersController {
     return this.usersService.patchUser(id, userDto);
   }
 
-
   @Delete('/@me')
   async deleteSelfUser(@Req() req: UserRequest) {
     return this.usersService.deleteUser(req.user.id);
@@ -68,7 +70,12 @@ class UsersController {
 
   @Get('/:id/posts')
   async getUserPosts(@Req() req: UserRequest, @Param('id') id: string) {
-    const userId = (await this.usersService.getUserByIdent(id === '@me' ? req.user.id : id, false)).id;
+    const userId = (
+      await this.usersService.getUserByIdent(
+        id === '@me' ? req.user.id : id,
+        false,
+      )
+    ).id;
     return this.postsService.findUserPosts(id === '@me' ? req.user.id : userId);
   }
 }

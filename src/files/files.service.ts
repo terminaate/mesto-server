@@ -4,10 +4,10 @@ import * as path from 'path';
 import CustomHttpException from 'src/exceptions/custom-http.exception';
 import ApiExceptions from '../exceptions/api.exceptions';
 
-
 @Injectable()
 class FilesService {
-  private readonly rootPath: string = path.resolve(__dirname, '../') + '/static';
+  private readonly rootPath: string =
+    path.resolve(__dirname, '../') + '/static';
 
   constructor() {
     this.createStaticFolder();
@@ -23,15 +23,13 @@ class FilesService {
 
   private createStaticFolder() {
     if (!this.isStaticFolderExist()) {
-      fs.mkdir(this.rootPath, () => {
-      });
+      fs.mkdir(this.rootPath, () => {});
     }
   }
 
   public createNewUserFolder(userId: string, path = '') {
     const userPath = this.rootPath + `/${userId}${path}`;
-    fs.mkdir(userPath, () => {
-    });
+    fs.mkdir(userPath, () => {});
   }
 
   private bytesToSize(bytes: number) {
@@ -60,7 +58,10 @@ class FilesService {
       return null;
     }
 
-    const response: { data: Buffer, type: string } = {} as { data: Buffer, type: string };
+    const response: { data: Buffer; type: string } = {} as {
+      data: Buffer;
+      type: string;
+    };
 
     response.type = matches[1];
     response.data = Buffer.from(matches[2], 'base64');
@@ -74,12 +75,14 @@ class FilesService {
     const foundFile = this.findFileWithName(this.rootPath + path, fileName);
 
     if (foundFile && foundFile !== `${fileName}.${fileExt[1]}`) {
-      fs.rm(this.rootPath + `${path}/${foundFile}`, () => {
-      });
+      fs.rm(this.rootPath + `${path}/${foundFile}`, () => {});
     }
 
-    fs.writeFile(this.rootPath + `${path}/${fileName}.${fileExt[1]}`, decodedImage.data, () => {
-    });
+    fs.writeFile(
+      this.rootPath + `${path}/${fileName}.${fileExt[1]}`,
+      decodedImage.data,
+      () => {},
+    );
   }
 
   public getFileSize(imageBase: string) {
@@ -94,20 +97,30 @@ class FilesService {
 
     const imageExt = this.getFileExt(image).split('/');
     const imageSize = this.getFileSize(image);
-    const isImageBase64 = image && this.isStringBase64(image) || imageExt[0] === 'image';
+    const isImageBase64 =
+      (image && this.isStringBase64(image)) || imageExt[0] === 'image';
     if (!isImageBase64) {
-      throw new CustomHttpException(ApiExceptions.FileNotBase64(), HttpStatus.BAD_REQUEST);
+      throw new CustomHttpException(
+        ApiExceptions.FileNotBase64(),
+        HttpStatus.BAD_REQUEST,
+      );
     }
-    const isImageSizeValid = imageSize !== 'n/a' && Object.keys(imageSize).includes('kb') || (Object.keys(imageSize).includes('mb') && (imageSize as Record<string, number>).mb < 5);
+    const isImageSizeValid =
+      (imageSize !== 'n/a' && Object.keys(imageSize).includes('kb')) ||
+      (Object.keys(imageSize).includes('mb') &&
+        (imageSize as Record<string, number>).mb < 5);
     if (!isImageSizeValid) {
-      throw new CustomHttpException(ApiExceptions.TooLargeFileSize(), HttpStatus.BAD_REQUEST);
+      throw new CustomHttpException(
+        ApiExceptions.TooLargeFileSize(),
+        HttpStatus.BAD_REQUEST,
+      );
     }
     return imageExt;
   }
 
   private findFileWithName(path: string, fileName: string): string | false {
     try {
-      return fs.readdirSync(path).find(file => file.includes(fileName));
+      return fs.readdirSync(path).find((file) => file.includes(fileName));
     } catch (e) {
       return false;
     }
@@ -126,7 +139,10 @@ class FilesService {
       const foundFile = this.findFileWithName(this.rootPath + path, fileName);
       fs.rmSync(this.rootPath + `${path}/${foundFile}`);
     } catch (e) {
-      throw new CustomHttpException(ApiExceptions.FileNotFound(), HttpStatus.BAD_REQUEST);
+      throw new CustomHttpException(
+        ApiExceptions.FileNotFound(),
+        HttpStatus.BAD_REQUEST,
+      );
     }
   }
 
@@ -138,7 +154,10 @@ class FilesService {
     try {
       fs.rmdirSync(this.rootPath + `/${userId}`);
     } catch (e) {
-      throw new CustomHttpException(ApiExceptions.UserIdNotExist(), HttpStatus.BAD_REQUEST);
+      throw new CustomHttpException(
+        ApiExceptions.UserIdNotExist(),
+        HttpStatus.BAD_REQUEST,
+      );
     }
   }
 

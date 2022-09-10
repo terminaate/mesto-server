@@ -6,11 +6,13 @@ import LoginUserDto from './dto/login-user.dto';
 
 @Controller('auth')
 class AuthController {
-  constructor(private authService: AuthService) {
-  }
+  constructor(private authService: AuthService) {}
 
   @Post('login')
-  async login(@Body() userDto: LoginUserDto, @Res({ passthrough: true }) res: Response) {
+  async login(
+    @Body() userDto: LoginUserDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
     const {
       accessToken,
       refreshToken,
@@ -24,7 +26,10 @@ class AuthController {
   }
 
   @Post('register')
-  async register(@Body() userDto: RegisterUserDto, @Res({ passthrough: true }) res: Response) {
+  async register(
+    @Body() userDto: RegisterUserDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
     const {
       accessToken,
       refreshToken,
@@ -35,12 +40,13 @@ class AuthController {
   }
 
   @Post('refresh')
-  async refresh(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
+  async refresh(
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ) {
     const { refreshToken } = req.cookies;
-    const {
-      accessToken: newAccessToken,
-      refreshToken: newRefreshToken,
-    } = await this.authService.refresh(refreshToken);
+    const { accessToken: newAccessToken, refreshToken: newRefreshToken } =
+      await this.authService.refresh(refreshToken);
     res.cookie('refreshToken', newRefreshToken, { httpOnly: true });
     res.json({ accessToken: newAccessToken });
   }

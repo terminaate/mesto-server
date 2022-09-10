@@ -6,13 +6,16 @@ import { json, urlencoded } from 'express';
 
 async function bootstrap() {
   const PORT = process.env.PORT || 3000;
-  const app = await NestFactory.create(AppModule, { cors: { origin: process.env.CLIENT_URL, credentials: true } });
+  const app = await NestFactory.create(AppModule, {
+    cors: {
+      origin: JSON.parse(process.env.CLIENT_URL),
+      credentials: true,
+    },
+  });
   // Use global validation
   app.useGlobalPipes(new ValidationPipe());
   app.setGlobalPrefix('api', {
-    exclude: [
-      { path: '/static/:path*', method: RequestMethod.GET },
-    ],
+    exclude: [{ path: '/static/:path*', method: RequestMethod.GET }],
   });
   app.use(cookieParser());
   app.use(json({ limit: '10mb' }));

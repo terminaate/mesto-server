@@ -5,7 +5,6 @@ import FilesService from './files.service';
   providers: [FilesService],
   exports: [FilesService],
 })
-class FilesModule {
-}
+class FilesModule {}
 
 export default FilesModule;

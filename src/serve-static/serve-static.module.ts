@@ -8,7 +8,6 @@ import FilesModule from '../files/files.module';
   providers: [ServeStaticService],
   controllers: [ServeStaticController],
 })
-class ServeStaticModule {
-}
+class ServeStaticModule {}
 
 export default ServeStaticModule;

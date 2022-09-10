@@ -1,7 +1,12 @@
-import { IsNotEmpty, IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  MaxLength,
+  MinLength,
+} from 'class-validator';
 
 class PatchPostDto {
-
   @IsOptional()
   @IsString()
   @IsNotEmpty()

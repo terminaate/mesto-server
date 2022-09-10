@@ -1,7 +1,13 @@
-import { IsBase64, IsNotEmpty, IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
+import {
+  IsBase64,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  MaxLength,
+  MinLength,
+} from 'class-validator';
 
 class CreatePostDto {
-
   @IsString()
   @IsNotEmpty()
   userId: string;

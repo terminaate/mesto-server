@@ -12,7 +12,6 @@ class PostDto {
     this.description = model.description;
     this.likes = model.likes;
   }
-
 }
 
 export default PostDto;

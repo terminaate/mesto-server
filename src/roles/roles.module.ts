@@ -13,7 +13,6 @@ import RolesController from './roles.controller';
   exports: [RolesService],
   controllers: [RolesController],
 })
-class RolesModule {
-}
+class RolesModule {}
 
 export default RolesModule;

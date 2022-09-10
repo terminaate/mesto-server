@@ -8,19 +8,17 @@ import ApiExceptions from '../exceptions/api.exceptions';
 
 @Injectable()
 class RolesService {
-  constructor(
-    @InjectModel(Role.name) private rolesModel: Model<RoleDocument>,
-  ) {
-    this.rolesModel.findOne({value: "ADMIN"}).then(r => {
+  constructor(@InjectModel(Role.name) private rolesModel: Model<RoleDocument>) {
+    this.rolesModel.findOne({ value: 'ADMIN' }).then((r) => {
       if (!r) {
-        this.rolesModel.create({value: "ADMIN"})
+        this.rolesModel.create({ value: 'ADMIN' });
       }
-    })
-    this.rolesModel.findOne({value: "USER"}).then(r => {
+    });
+    this.rolesModel.findOne({ value: 'USER' }).then((r) => {
       if (!r) {
-        this.rolesModel.create({value: "USER"})
+        this.rolesModel.create({ value: 'USER' });
       }
-    })
+    });
   }
 
   async getRoleByFilter(filter: { [key: string]: string } = { value: 'USER' }) {
@@ -44,7 +42,6 @@ class RolesService {
     }
     return this.rolesModel.create({ value: newRoleValue });
   }
-
 }
 
 export default RolesService;

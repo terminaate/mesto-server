@@ -16,14 +16,12 @@ import { PostsModule } from '../posts/posts.module';
     ]),
     JwtModule.register({}),
     FilesModule,
-    forwardRef(() => PostsModule)
+    forwardRef(() => PostsModule),
   ],
   controllers: [UsersController],
   providers: [UsersService],
   exports: [UsersService],
 })
-class UsersModule {
-
-}
+class UsersModule {}
 
 export default UsersModule;

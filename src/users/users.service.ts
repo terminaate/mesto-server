@@ -14,11 +14,11 @@ import FilesService from '../files/files.service';
 class UsersService {
   constructor(
     @InjectModel(User.name) private usersModel: Model<UserDocument>,
-    @InjectModel(UserToken.name) private usersTokensModel: Model<UserTokenDocument>,
+    @InjectModel(UserToken.name)
+    private usersTokensModel: Model<UserTokenDocument>,
     private jwtService: JwtService,
     private filesService: FilesService,
-  ) {
-  }
+  ) {}
 
   async createNewUser(user: User): Promise<UserDocument> {
     return await this.usersModel.create(user);
@@ -73,18 +73,26 @@ class UsersService {
   }
 
   async getUserByIdent(ident: string, isSelfUser: boolean) {
-    const filter: { $or: Record<string, string>[] } = { $or: [{ username: ident }] };
+    const filter: { $or: Record<string, string>[] } = {
+      $or: [{ username: ident }],
+    };
     if (Types.ObjectId.isValid(ident)) {
       filter.$or.push({ _id: ident });
     }
     const user = await this.usersModel.findOne(filter);
     if (!user) {
-      throw new CustomHttpException(ApiExceptions.UserNotExist(), HttpStatus.BAD_REQUEST);
+      throw new CustomHttpException(
+        ApiExceptions.UserNotExist(),
+        HttpStatus.BAD_REQUEST,
+      );
     }
     return new UserDto(user, isSelfUser);
   }
 
-  async patchUser(userId: string, { avatar, bio, password, username, email, login }: PatchUserDto) {
+  async patchUser(
+    userId: string,
+    { avatar, bio, password, username, email, login }: PatchUserDto,
+  ) {
     if (!userId) {
       throw new CustomHttpException(
         ApiExceptions.UserIdNotExist(),
@@ -124,7 +132,10 @@ class UsersService {
   async deleteUser(userId: string) {
     const user = await this.usersModel.findById(userId);
     if (!user) {
-      throw new CustomHttpException(ApiExceptions.UserIdNotExist(), HttpStatus.NOT_FOUND);
+      throw new CustomHttpException(
+        ApiExceptions.UserIdNotExist(),
+        HttpStatus.NOT_FOUND,
+      );
     }
 
     await this.usersTokensModel.deleteOne({ userId });
@@ -138,7 +149,9 @@ class UsersService {
     if (Object.keys(filter).length <= 0) {
       return [];
     }
-    return (await this.usersModel.find(filter)).map(user => new UserDto(user));
+    return (await this.usersModel.find(filter)).map(
+      (user) => new UserDto(user),
+    );
   }
 }
 

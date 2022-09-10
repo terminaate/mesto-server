@@ -6,24 +6,32 @@ import ApiExceptions from '../exceptions/api.exceptions';
 
 @Controller('/static')
 class ServeStaticController {
-
-  constructor(
-    private serveStaticService: ServeStaticService,
-  ) {
-  }
+  constructor(private serveStaticService: ServeStaticService) {}
 
   @Get('/:path*')
-  async getPath(@Res({ passthrough: true }) res: Response, @Req() req: Request, @Query('size') size: string) {
-    let file: { buffer: Buffer, type: string };
+  async getPath(
+    @Res({ passthrough: true }) res: Response,
+    @Req() req: Request,
+    @Query('size') size: string,
+  ) {
+    let file: { buffer: Buffer; type: string };
 
     if (Number(size)) {
-      file = await this.serveStaticService.getFile(Object.values(req.params).reverse().join(''), Number(size));
+      file = await this.serveStaticService.getFile(
+        Object.values(req.params).reverse().join(''),
+        Number(size),
+      );
     } else {
-      file = await this.serveStaticService.getFile(Object.values(req.params).reverse().join(''));
+      file = await this.serveStaticService.getFile(
+        Object.values(req.params).reverse().join(''),
+      );
     }
 
     if (!file || !file.buffer || !file.type) {
-      throw new CustomHttpException(ApiExceptions.FileNotFound(), HttpStatus.BAD_REQUEST);
+      throw new CustomHttpException(
+        ApiExceptions.FileNotFound(),
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     res.setHeader('Content-Type', file.type);

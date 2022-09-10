@@ -13,18 +13,18 @@ import UsersService from '../users/users.service';
 
 @Injectable()
 export class PostsService {
-
   constructor(
     @InjectModel(Post.name) private postsModel: Model<PostDocument>,
     private filesService: FilesService,
     private usersService: UsersService,
-  ) {
-  }
-
+  ) {}
 
   public async createPost(postDto: CreatePostDto) {
-    if (!await this.usersService.findUserByFilter({ _id: postDto.userId })) {
-      throw new CustomHttpException(ApiExceptions.UserIdNotExist(), HttpStatus.BAD_REQUEST);
+    if (!(await this.usersService.findUserByFilter({ _id: postDto.userId }))) {
+      throw new CustomHttpException(
+        ApiExceptions.UserIdNotExist(),
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     this.filesService.validateImage(postDto.image);
@@ -38,10 +38,17 @@ export class PostsService {
     return new PostDto(newPost);
   }
 
-  public async patchPost(postId: string, { title, description, image }: PatchPostDto, user: UserDocument) {
+  public async patchPost(
+    postId: string,
+    { title, description, image }: PatchPostDto,
+    user: UserDocument,
+  ) {
     const post = await this.postsModel.findById(postId);
     if (!post) {
-      throw new CustomHttpException(ApiExceptions.PostNotExist(), HttpStatus.BAD_REQUEST);
+      throw new CustomHttpException(
+        ApiExceptions.PostNotExist(),
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     if (post.userId !== user.id && !user.roles.includes('ADMIN')) {
@@ -70,26 +77,40 @@ export class PostsService {
 
   async findPostById(id: string) {
     if (!id) {
-      throw new CustomHttpException(ApiExceptions.PostNotExist(), HttpStatus.BAD_REQUEST);
+      throw new CustomHttpException(
+        ApiExceptions.PostNotExist(),
+        HttpStatus.BAD_REQUEST,
+      );
     }
     const post = this.postsModel.findById(id);
     if (!post) {
-      throw new CustomHttpException(ApiExceptions.PostNotExist(), HttpStatus.BAD_REQUEST);
+      throw new CustomHttpException(
+        ApiExceptions.PostNotExist(),
+        HttpStatus.BAD_REQUEST,
+      );
     }
     return new PostDto(post);
   }
 
   async findUserPosts(userId: string) {
     if (!userId) {
-      throw new CustomHttpException(ApiExceptions.UserNotExist(), HttpStatus.BAD_REQUEST);
+      throw new CustomHttpException(
+        ApiExceptions.UserNotExist(),
+        HttpStatus.BAD_REQUEST,
+      );
     }
-    return (await this.postsModel.find({ userId })).map(post => new PostDto(post)).reverse();
+    return (await this.postsModel.find({ userId }))
+      .map((post) => new PostDto(post))
+      .reverse();
   }
 
   async deletePost(postId: string, user: UserDocument) {
     const post = await this.postsModel.findById(postId);
     if (!post) {
-      throw new CustomHttpException(ApiExceptions.PostNotExist(), HttpStatus.BAD_REQUEST);
+      throw new CustomHttpException(
+        ApiExceptions.PostNotExist(),
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     if (post.userId !== user.id && !user.roles.includes('ADMIN')) {
@@ -103,11 +124,14 @@ export class PostsService {
   async likePost(postId: string, userId: string) {
     const post = await this.postsModel.findById(postId);
     if (!post) {
-      throw new CustomHttpException(ApiExceptions.PostNotExist(), HttpStatus.BAD_REQUEST);
+      throw new CustomHttpException(
+        ApiExceptions.PostNotExist(),
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     if (post.likes.includes(userId)) {
-      post.likes = post.likes.filter(id => String(id) !== userId);
+      post.likes = post.likes.filter((id) => String(id) !== userId);
     } else {
       post.likes.push(userId);
     }

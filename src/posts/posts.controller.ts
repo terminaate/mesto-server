@@ -19,11 +19,7 @@ import JwtAuthGuard, { UserRequest } from '../auth/guards/jwt-auth.guard';
 @UseGuards(JwtAuthGuard)
 @Controller('posts')
 export class PostsController {
-
-  constructor(
-    private postsService: PostsService,
-  ) {
-  }
+  constructor(private postsService: PostsService) {}
 
   @HttpCode(HttpStatus.CREATED)
   @Post('/')
@@ -33,7 +29,11 @@ export class PostsController {
 
   @HttpCode(HttpStatus.ACCEPTED)
   @Patch('/:id')
-  async patchPost(@Req() { user }: UserRequest, @Param('id') id: string, @Body() postDto: PatchPostDto) {
+  async patchPost(
+    @Req() { user }: UserRequest,
+    @Param('id') id: string,
+    @Body() postDto: PatchPostDto,
+  ) {
     return this.postsService.patchPost(id, postDto, user);
   }
 

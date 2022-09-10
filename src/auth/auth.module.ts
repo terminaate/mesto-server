@@ -7,15 +7,10 @@ import FilesModule from '../files/files.module';
 import RolesModule from '../roles/roles.module';
 
 @Module({
-  imports: [
-    UsersModule,
-    FilesModule,
-    RolesModule,
-  ],
+  imports: [UsersModule, FilesModule, RolesModule],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy],
 })
-class AuthModule {
-}
+class AuthModule {}
 
 export default AuthModule;

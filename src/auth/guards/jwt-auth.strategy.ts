@@ -18,7 +18,14 @@ class JwtStrategy extends PassportStrategy(Strategy) {
 
   async validate(payload: { id: string }) {
     const user = await this.usersService.findUserByFilter({ _id: payload.id });
-    user.roles = await Promise.all(user.roles.map(async role => (await this.rolesService.getRoleByFilter({ _id: role })).value));
+    user.roles = await Promise.all(
+      user.roles.map(
+        async (role) =>
+          (
+            await this.rolesService.getRoleByFilter({ _id: role })
+          ).value,
+      ),
+    );
     return user;
   }
 }

@@ -17,8 +17,7 @@ class AuthService {
     private usersService: UsersService,
     private filesService: FilesService,
     private rolesService: RolesService,
-  ) {
-  }
+  ) {}
 
   async login(ident: string, password: string) {
     const candidate = await this.usersService.findUserByFilter({
@@ -46,7 +45,8 @@ class AuthService {
 
   async register(userDto: RegisterUserDto) {
     const candidate = await this.usersService.findUserByFilter({
-      login: userDto.login, email: userDto.email,
+      login: userDto.login,
+      email: userDto.email,
     });
     if (candidate) {
       throw new CustomHttpException(

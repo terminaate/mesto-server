@@ -12,7 +12,11 @@ class Post {
   @Prop({ type: String, required: false })
   description: string;
 
-  @Prop({ type: [{ type: Types.ObjectId, ref: 'User', required: true }], required: true, default: [] })
+  @Prop({
+    type: [{ type: Types.ObjectId, ref: 'User', required: true }],
+    required: true,
+    default: [],
+  })
   likes: string[];
 }
 

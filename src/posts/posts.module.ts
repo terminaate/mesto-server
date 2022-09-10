@@ -16,5 +16,4 @@ import UsersModule from '../users/users.module';
   controllers: [PostsController],
   exports: [PostsService],
 })
-export class PostsModule {
-}
+export class PostsModule {}

@@ -10,7 +10,7 @@ class ApiExceptions {
   }
 
   public static UserNotExist(): string {
-    return this.NewException('Can\'t find a user with this email or username.');
+    return this.NewException("Can't find a user with this email or username.");
   }
 
   public static UserAlreadyExist(): string {
@@ -30,7 +30,7 @@ class ApiExceptions {
   }
 
   public static RoleValueEmpty(): string {
-    return this.NewException('Can\'t find value in body.');
+    return this.NewException("Can't find value in body.");
   }
 
   public static FileNotBase64(): string {
@@ -54,7 +54,9 @@ class ApiExceptions {
   }
 
   public static FileNotValid(): string {
-    return this.NewException('File size or file type is not valid. (file is a base64 string and max size its a 5 mb)');
+    return this.NewException(
+      'File size or file type is not valid. (file is a base64 string and max size its a 5 mb)',
+    );
   }
 
   public static PostAlreadyLiked(): string {

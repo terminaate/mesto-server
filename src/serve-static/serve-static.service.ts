@@ -7,22 +7,32 @@ import * as sharp from 'sharp';
 
 @Injectable()
 class ServeStaticService {
-
-  constructor() {
-  }
+  constructor() {}
 
   async getFile(filePath: string, size?: number) {
     const fileSplitPath = filePath.split('/');
     const fileName = fileSplitPath[fileSplitPath.length - 1];
-    const path = resolvePath(__dirname, `../static/${fileSplitPath.slice(0, -1).join('/')}/`);
+    const path = resolvePath(
+      __dirname,
+      `../static/${fileSplitPath.slice(0, -1).join('/')}/`,
+    );
     try {
-      const foundFile = fs.readdirSync(path).filter(v => v.includes(fileName))[0];
-      const buffer = size ? await sharp(path + `/${foundFile}`).resize(size).toBuffer() : fs.readFileSync(path + `/${foundFile}`);
+      const foundFile = fs
+        .readdirSync(path)
+        .filter((v) => v.includes(fileName))[0];
+      const buffer = size
+        ? await sharp(path + `/${foundFile}`)
+            .resize(size)
+            .toBuffer()
+        : fs.readFileSync(path + `/${foundFile}`);
       const type = `image/${foundFile.split('.')[1]}`;
       return { buffer, type };
     } catch (e) {
       console.log(e);
-      throw new CustomHttpException(ApiExceptions.FileNotFound(), HttpStatus.BAD_REQUEST);
+      throw new CustomHttpException(
+        ApiExceptions.FileNotFound(),
+        HttpStatus.BAD_REQUEST,
+      );
     }
   }
 }

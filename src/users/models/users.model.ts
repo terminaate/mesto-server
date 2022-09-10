@@ -18,7 +18,10 @@ class User {
   @Prop({ type: String, required: true })
   password: string;
 
-  @Prop({ type: [{ type: Types.ObjectId, required: true, ref: 'Role' }], required: true })
+  @Prop({
+    type: [{ type: Types.ObjectId, required: true, ref: 'Role' }],
+    required: true,
+  })
   roles: string[];
 }
 
