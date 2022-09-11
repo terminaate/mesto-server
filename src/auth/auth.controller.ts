@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Req, Res } from '@nestjs/common';
+import { Body, Controller, ForbiddenException, Post, Req, Res } from '@nestjs/common';
 import RegisterUserDto from './dto/register-user.dto';
 import AuthService from './auth.service';
 import { Request, Response } from 'express';
@@ -6,7 +6,8 @@ import LoginUserDto from './dto/login-user.dto';
 
 @Controller('auth')
 class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService) {
+  }
 
   @Post('login')
   async login(
@@ -49,6 +50,17 @@ class AuthController {
       await this.authService.refresh(refreshToken);
     res.cookie('refreshToken', newRefreshToken, { httpOnly: true });
     res.json({ accessToken: newAccessToken });
+  }
+
+  @Post('logout')
+  async logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
+    const { refreshToken } = req.cookies;
+    if (!refreshToken) {
+      throw new ForbiddenException();
+    }
+    await this.authService.logout(refreshToken);
+    res.clearCookie('refreshToken', { httpOnly: true });
+    res.end();
   }
 }
 

@@ -1,4 +1,4 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
+import { ForbiddenException, HttpStatus, Injectable } from '@nestjs/common';
 import RegisterUserDto from './dto/register-user.dto';
 import UsersService from '../users/users.service';
 import * as argon2 from 'argon2';
@@ -17,15 +17,16 @@ class AuthService {
     private usersService: UsersService,
     private filesService: FilesService,
     private rolesService: RolesService,
-  ) {}
+  ) {
+  }
 
   async login(ident: string, password: string) {
     const candidate = await this.usersService.findUserByFilter({
-      $or: [{ email: ident }, { username: ident }],
+      $or: [{ email: ident }, { login: ident }],
     });
     if (!candidate) {
       throw new CustomHttpException(
-        ApiExceptions.UserNotExist(),
+        ApiExceptions.WrongAuthData(),
         HttpStatus.BAD_REQUEST,
       );
     }
@@ -86,6 +87,16 @@ class AuthService {
       );
     }
     return userTokens;
+  }
+
+  async logout(refreshToken: string) {
+    // LMAO
+    // In this method im doing ref tp another service xD
+    const token = await this.usersService.findTokenByFilter({ refreshToken });
+    if (!token) {
+      throw new ForbiddenException();
+    }
+    await token.delete();
   }
 }
 

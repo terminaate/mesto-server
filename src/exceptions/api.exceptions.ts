@@ -10,15 +10,15 @@ class ApiExceptions {
   }
 
   public static UserNotExist(): string {
-    return this.NewException("Can't find a user with this email or username.");
+    return this.NewException("Can't find a user with this data.");
   }
 
   public static UserAlreadyExist(): string {
-    return this.NewException('User with this email or username already exist.');
+    return this.NewException('User with this email or login already exist.');
   }
 
   public static WrongAuthData(): string {
-    return this.NewException('Wrong email or username or password.');
+    return this.NewException('Wrong email or login or password.');
   }
 
   public static UserIdNotExist(): string {

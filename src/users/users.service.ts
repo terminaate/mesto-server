@@ -18,7 +18,8 @@ class UsersService {
     private usersTokensModel: Model<UserTokenDocument>,
     private jwtService: JwtService,
     private filesService: FilesService,
-  ) {}
+  ) {
+  }
 
   async createNewUser(user: User): Promise<UserDocument> {
     return await this.usersModel.create(user);
@@ -152,6 +153,10 @@ class UsersService {
     return (await this.usersModel.find(filter)).map(
       (user) => new UserDto(user),
     );
+  }
+
+  async findTokenByFilter(filter: Record<string, any>) {
+    return this.usersTokensModel.findOne(filter);
   }
 }
 
