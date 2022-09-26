@@ -11,6 +11,8 @@ import User from './users/models/users.model';
 import UserToken from './users/models/users-tokens.model';
 import Role from './roles/roles.model';
 import Post from './posts/posts.model';
+import UserRole from './roles/user-role.model';
+import UserPost from './posts/user-post.model';
 
 @Module({
   imports: [
@@ -25,7 +27,7 @@ import Post from './posts/posts.model';
       autoLoadModels: true,
       omitNull: true,
       synchronize: true,
-      models: [User, UserToken, Role, Post]
+      models: [User, UserToken, Role, UserRole, Post, UserPost]
     }),
     AuthModule,
     UsersModule,

@@ -6,9 +6,10 @@ import CustomHttpException from '../exceptions/custom-http.exception';
 import PatchUserDto from './dto/patch-user.dto';
 import FilesService from '../files/files.service';
 import { InjectModel } from '@nestjs/sequelize';
-import User from './models/users.model';
+import User, { UserCreationAttrs } from './models/users.model';
 import UserToken from './models/users-tokens.model';
 import { UUIDv4 } from 'uuid-v4-validator';
+import { Op } from 'sequelize';
 
 @Injectable()
 class UsersService {
@@ -21,7 +22,7 @@ class UsersService {
   ) {
   }
 
-  async createNewUser(user: User): Promise<User> {
+  async createNewUser(user: UserCreationAttrs): Promise<User> {
     return await this.usersModel.create(user);
   }
 
@@ -74,11 +75,11 @@ class UsersService {
   }
 
   async getUserByIdent(ident: string, isSelfUser: boolean) {
-    const filter: { $or: Record<string, string>[] } = {
-      $or: [{ username: ident }],
+    const filter: { [Op.or]: Record<string, string>[] } = {
+      [Op.or]: [{ username: ident }],
     };
     if (UUIDv4.validate(ident)) {
-      filter.$or.push({ id: ident });
+      filter[Op.or].push({ id: ident });
     }
     const user = await this.usersModel.findOne({ where: filter });
     if (!user) {

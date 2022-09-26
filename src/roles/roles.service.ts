@@ -1,28 +1,27 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import Role, { RoleDocument } from './roles.model';
-import { Model } from 'mongoose';
+import Role from './roles.model';
 import CreateRoleDto from './dto/create-role.dto';
 import CustomHttpException from '../exceptions/custom-http.exception';
 import ApiExceptions from '../exceptions/api.exceptions';
+import { InjectModel } from '@nestjs/sequelize';
 
 @Injectable()
 class RolesService {
-  constructor(@InjectModel(Role.name) private rolesModel: Model<RoleDocument>) {
-    this.rolesModel.findOne({ value: 'ADMIN' }).then((r) => {
+  constructor(@InjectModel(Role) private rolesModel: typeof Role) {
+    this.rolesModel.findOne({ where: { value: 'ADMIN' } }).then(r => {
       if (!r) {
         this.rolesModel.create({ value: 'ADMIN' });
       }
     });
-    this.rolesModel.findOne({ value: 'USER' }).then((r) => {
+    this.rolesModel.findOne({ where: { value: 'USER' } }).then(r => {
       if (!r) {
         this.rolesModel.create({ value: 'USER' });
       }
     });
   }
 
-  async getRoleByFilter(filter: { [key: string]: string } = { value: 'USER' }) {
-    return this.rolesModel.findOne(filter);
+  async getRoleByFilter(filter: Record<string, any> = { value: 'USER' }) {
+    return this.rolesModel.findOne({ where: filter });
   }
 
   async createRole({ value: newRoleValue }: CreateRoleDto) {
@@ -33,7 +32,7 @@ class RolesService {
       );
     }
 
-    const candidate = await this.rolesModel.findOne({ value: newRoleValue });
+    const candidate = await this.rolesModel.findOne({ where: { value: newRoleValue } });
     if (candidate) {
       throw new CustomHttpException(
         ApiExceptions.RoleAlreadyExit(),

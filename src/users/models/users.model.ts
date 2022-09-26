@@ -1,11 +1,17 @@
-import { Column, DataType, HasMany, Model, Table } from 'sequelize-typescript';
+import { BelongsToMany, Column, DataType, HasMany, Model, Table } from 'sequelize-typescript';
 import Sequelize from 'sequelize';
 import Role from '../../roles/roles.model';
+import UserRole from '../../roles/user-role.model';
+import Post from '../../posts/posts.model';
+import UserPost from '../../posts/user-post.model';
 
 export interface UserCreationAttrs {
-  userId: string;
-  accessToken: string;
-  refreshToken: string;
+  email?: string;
+  login: string;
+  username: string;
+  bio?: string;
+  password: string;
+  roles: Role[];
 }
 
 @Table({ tableName: 'users' })
@@ -28,8 +34,11 @@ class User extends Model<User, UserCreationAttrs> {
   @Column({ type: DataType.STRING, allowNull: false })
   password: string;
 
-  @HasMany(() => Role)
+  @BelongsToMany(() => Role, () => UserRole)
   roles: Role[];
+
+  @BelongsToMany(() => Post, () => UserPost)
+  posts: Post[];
 }
 
 export default User;

@@ -1,6 +1,7 @@
-import { Column, DataType, ForeignKey, HasMany, Model, Table } from 'sequelize-typescript';
+import { BelongsToMany, Column, DataType, ForeignKey, Model, Table } from 'sequelize-typescript';
 import Sequelize from 'sequelize';
 import User from '../users/models/users.model';
+import UserPost from './user-post.model';
 
 export interface PostCreationAttrs {
   userId: string;
@@ -24,8 +25,7 @@ class Post extends Model<Post, PostCreationAttrs> {
   @Column({ type: DataType.STRING, allowNull: true })
   description: string;
 
-  @HasMany(() => User)
-  @Column({ allowNull: false, defaultValue: [] })
+  @BelongsToMany(() => User, () => UserPost)
   likes: User[];
 }
 

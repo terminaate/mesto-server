@@ -7,6 +7,7 @@ import ApiExceptions from '../exceptions/api.exceptions';
 import CustomHttpException from '../exceptions/custom-http.exception';
 import FilesService from '../files/files.service';
 import RolesService from '../roles/roles.service';
+import { Op } from 'sequelize';
 
 @Injectable()
 class AuthService {
@@ -19,7 +20,10 @@ class AuthService {
 
   async login(ident: string, password: string) {
     const candidate = await this.usersService.findUserByFilter({
-      $or: [{ email: ident }, { login: ident }],
+      [Op.or]: [
+        { login: ident },
+        { email: ident },
+      ],
     });
     if (!candidate) {
       throw new CustomHttpException(
@@ -43,8 +47,10 @@ class AuthService {
 
   async register(userDto: RegisterUserDto) {
     const candidate = await this.usersService.findUserByFilter({
-      login: userDto.login,
-      email: userDto.email,
+      [Op.or]: [
+        { login: userDto.login },
+        { email: userDto.email },
+      ],
     });
     if (candidate) {
       throw new CustomHttpException(
@@ -59,7 +65,7 @@ class AuthService {
       username: userDto.login,
       email: userDto.email ?? null,
       password: hashedPassword,
-      roles: [userRole.id],
+      roles: [userRole],
     });
     const userTokens = await this.usersService.generateUserTokens(
       newUser.id,
@@ -93,7 +99,7 @@ class AuthService {
     if (!token) {
       throw new ForbiddenException();
     }
-    await token.delete();
+    await token.destroy();
   }
 }
 
