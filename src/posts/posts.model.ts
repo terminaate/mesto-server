@@ -1,27 +1,32 @@
-import { Document, Types } from 'mongoose';
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Column, DataType, ForeignKey, HasMany, Model, Table } from 'sequelize-typescript';
+import Sequelize from 'sequelize';
+import User from '../users/models/users.model';
 
-@Schema()
-class Post {
-  @Prop({ type: Types.ObjectId, ref: 'User', required: true })
+export interface PostCreationAttrs {
   userId: string;
-
-  @Prop({ type: String, required: true })
   title: string;
-
-  @Prop({ type: String, required: false })
-  description: string;
-
-  @Prop({
-    type: [{ type: Types.ObjectId, ref: 'User', required: true }],
-    required: true,
-    default: [],
-  })
-  likes: string[];
+  description?: string;
+  roles: string[];
 }
 
-export type PostDocument = Post & Document;
+@Table({ tableName: 'posts' })
+class Post extends Model<Post, PostCreationAttrs> {
+  @Column({ type: DataType.UUIDV4, defaultValue: Sequelize.UUIDV4, primaryKey: true })
+  id: string;
 
-export const PostSchema = SchemaFactory.createForClass(Post);
+  @ForeignKey(() => User)
+  @Column({ type: DataType.UUIDV4, allowNull: false })
+  userId: string;
+
+  @Column({ type: DataType.STRING, allowNull: false })
+  title: string;
+
+  @Column({ type: DataType.STRING, allowNull: true })
+  description: string;
+
+  @HasMany(() => User)
+  @Column({ allowNull: false, defaultValue: [] })
+  likes: User[];
+}
 
 export default Post;

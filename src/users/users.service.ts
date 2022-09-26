@@ -1,40 +1,40 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import User, { UserDocument } from './models/users.model';
-import { Model, Types } from 'mongoose';
-import UserToken, { UserTokenDocument } from './models/users-tokens.model';
 import { JwtService } from '@nestjs/jwt';
 import ApiExceptions from '../exceptions/api.exceptions';
 import UserDto from './dto/user.dto';
 import CustomHttpException from '../exceptions/custom-http.exception';
 import PatchUserDto from './dto/patch-user.dto';
 import FilesService from '../files/files.service';
+import { InjectModel } from '@nestjs/sequelize';
+import User from './models/users.model';
+import UserToken from './models/users-tokens.model';
+import { UUIDv4 } from 'uuid-v4-validator';
 
 @Injectable()
 class UsersService {
   constructor(
-    @InjectModel(User.name) private usersModel: Model<UserDocument>,
-    @InjectModel(UserToken.name)
-    private usersTokensModel: Model<UserTokenDocument>,
+    @InjectModel(User) private usersModel: typeof User,
+    // @InjectModel(User.name) private usersModel: Model<UserDocument>,
+    @InjectModel(UserToken) private usersTokensModel: typeof UserToken,
     private jwtService: JwtService,
     private filesService: FilesService,
   ) {
   }
 
-  async createNewUser(user: User): Promise<UserDocument> {
+  async createNewUser(user: User): Promise<User> {
     return await this.usersModel.create(user);
   }
 
-  async findUserByFilter(filter: Record<string, any>): Promise<UserDocument> {
-    return this.usersModel.findOne(filter);
+  async findUserByFilter(filter: Record<string, any>): Promise<User> {
+    return this.usersModel.findOne({ where: filter });
   }
 
-  async findUserTokens(userId: string): Promise<UserTokenDocument> {
-    return this.usersTokensModel.findOne({ userId });
+  async findUserTokens(userId: string): Promise<UserToken> {
+    return this.usersTokensModel.findOne({ where: { userId } });
   }
 
   async refreshUserTokens(refreshToken: string) {
-    const userTokens = await this.usersTokensModel.findOne({ refreshToken });
+    const userTokens = await this.usersTokensModel.findOne({ where: { refreshToken } });
     if (!userTokens) {
       return null;
     }
@@ -57,7 +57,7 @@ class UsersService {
       },
     );
     if (save) {
-      const userTokens = await this.usersTokensModel.findOne({ userId });
+      const userTokens = await this.usersTokensModel.findOne({ where: { userId } });
       if (!userTokens) {
         await this.usersTokensModel.create({
           userId,
@@ -77,10 +77,10 @@ class UsersService {
     const filter: { $or: Record<string, string>[] } = {
       $or: [{ username: ident }],
     };
-    if (Types.ObjectId.isValid(ident)) {
-      filter.$or.push({ _id: ident });
+    if (UUIDv4.validate(ident)) {
+      filter.$or.push({ id: ident });
     }
-    const user = await this.usersModel.findOne(filter);
+    const user = await this.usersModel.findOne({ where: filter });
     if (!user) {
       throw new CustomHttpException(
         ApiExceptions.UserNotExist(),
@@ -100,7 +100,7 @@ class UsersService {
         HttpStatus.BAD_REQUEST,
       );
     }
-    const user = await this.usersModel.findById(userId);
+    const user = await this.usersModel.findByPk(userId);
     if (!user) {
       throw new CustomHttpException(
         ApiExceptions.UserIdNotExist(),
@@ -126,12 +126,12 @@ class UsersService {
       }
     }
 
-    await user.updateOne(updatedFields);
+    await user.update(updatedFields);
     return { ...new UserDto(user), ...updatedFields };
   }
 
   async deleteUser(userId: string) {
-    const user = await this.usersModel.findById(userId);
+    const user = await this.usersModel.findByPk(userId);
     if (!user) {
       throw new CustomHttpException(
         ApiExceptions.UserIdNotExist(),
@@ -139,8 +139,8 @@ class UsersService {
       );
     }
 
-    await this.usersTokensModel.deleteOne({ userId });
-    await user.deleteOne();
+    await this.usersTokensModel.destroy({ where: { userId } });
+    await user.destroy();
 
     this.filesService.deleteUserFolder(userId);
     return new UserDto(user);
@@ -150,13 +150,13 @@ class UsersService {
     if (Object.keys(filter).length <= 0) {
       return [];
     }
-    return (await this.usersModel.find(filter)).map(
+    return (await this.usersModel.findAll({ where: filter })).map(
       (user) => new UserDto(user),
     );
   }
 
   async findTokenByFilter(filter: Record<string, any>) {
-    return this.usersTokensModel.findOne(filter);
+    return this.usersTokensModel.findOne({ where: filter });
   }
 }
 

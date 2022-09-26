@@ -1,14 +1,17 @@
-import { Document } from 'mongoose';
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Column, DataType, Model, Table } from 'sequelize-typescript';
+import Sequelize from 'sequelize';
 
-@Schema()
-class Role {
-  @Prop({ type: String, required: true })
+export interface RoleCreationAttrs {
   value: string;
 }
 
-export type RoleDocument = Role & Document;
+@Table({ tableName: 'roles' })
+class Role extends Model<Role, RoleCreationAttrs> {
+  @Column({ type: DataType.UUIDV4, defaultValue: Sequelize.UUIDV4, primaryKey: true })
+  id: string;
 
-export const RoleSchema = SchemaFactory.createForClass(Role);
+  @Column({ type: DataType.STRING, allowNull: false, unique: true })
+  value: string;
+}
 
 export default Role;

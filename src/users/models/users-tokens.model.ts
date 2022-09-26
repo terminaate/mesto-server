@@ -1,20 +1,29 @@
-import { Document, Types } from 'mongoose';
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Column, DataType, ForeignKey, Model, Table } from 'sequelize-typescript';
+import Sequelize from 'sequelize';
+import User from './users.model';
 
-@Schema()
-class UserToken {
-  @Prop({ type: Types.ObjectId, required: true, ref: 'User', unique: true })
+export interface UserTokenCreationAttrs {
   userId: string;
-
-  @Prop({ type: String, required: true, unique: true })
   accessToken: string;
-
-  @Prop({ type: String, required: true, unique: true })
   refreshToken: string;
 }
 
-export type UserTokenDocument = UserToken & Document;
+@Table({ tableName: 'users-tokens' })
+class UserToken extends Model<UserToken, UserTokenCreationAttrs> {
 
-export const UserTokenSchema = SchemaFactory.createForClass(UserToken);
+  @Column({ type: DataType.UUIDV4, defaultValue: Sequelize.UUIDV4, primaryKey: true })
+  id: string;
+
+  @ForeignKey(() => User)
+  @Column({ type: DataType.UUIDV4, unique: true, allowNull: false })
+  userId: string;
+
+  @Column({ type: DataType.STRING, allowNull: false, unique: true })
+  accessToken: string;
+
+  @Column({ type: DataType.STRING, allowNull: false, unique: true })
+  refreshToken: string;
+
+}
 
 export default UserToken;

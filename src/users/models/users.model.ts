@@ -1,32 +1,35 @@
-import { Document, Types } from 'mongoose';
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Column, DataType, HasMany, Model, Table } from 'sequelize-typescript';
+import Sequelize from 'sequelize';
+import Role from '../../roles/roles.model';
 
-@Schema()
-class User {
-  @Prop({ type: String })
-  email?: string;
-
-  @Prop({ type: String, required: true, unique: true })
-  login: string;
-
-  @Prop({ type: String })
-  username: string;
-
-  @Prop({ type: String })
-  bio?: string;
-
-  @Prop({ type: String, required: true })
-  password: string;
-
-  @Prop({
-    type: [{ type: Types.ObjectId, required: true, ref: 'Role' }],
-    required: true,
-  })
-  roles: string[];
+export interface UserCreationAttrs {
+  userId: string;
+  accessToken: string;
+  refreshToken: string;
 }
 
-export type UserDocument = User & Document;
+@Table({ tableName: 'users' })
+class User extends Model<User, UserCreationAttrs> {
+  @Column({ type: DataType.UUIDV4, defaultValue: Sequelize.UUIDV4, primaryKey: true })
+  id: string;
 
-export const UserSchema = SchemaFactory.createForClass(User);
+  @Column({ type: DataType.STRING })
+  email?: string;
+
+  @Column({ type: DataType.STRING, allowNull: false, unique: true })
+  login: string;
+
+  @Column({ type: DataType.STRING })
+  username: string;
+
+  @Column({ type: DataType.STRING })
+  bio?: string;
+
+  @Column({ type: DataType.STRING, allowNull: false })
+  password: string;
+
+  @HasMany(() => Role)
+  roles: Role[];
+}
 
 export default User;
