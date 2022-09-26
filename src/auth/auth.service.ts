@@ -8,9 +8,6 @@ import CustomHttpException from '../exceptions/custom-http.exception';
 import FilesService from '../files/files.service';
 import RolesService from '../roles/roles.service';
 
-// TODO
-// Add data validation
-
 @Injectable()
 class AuthService {
   constructor(
