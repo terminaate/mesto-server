@@ -46,12 +46,17 @@ class AuthService {
   }
 
   async register(userDto: RegisterUserDto) {
-    const candidate = await this.usersService.findUserByFilter({
+    const query: { [Op.or]: Record<string, string>[] } = {
       [Op.or]: [
         { login: userDto.login },
-        { email: userDto.email },
       ],
-    });
+    };
+
+    if (userDto.email) {
+      query[Op.or].push({ email: userDto.email });
+    }
+
+    const candidate = await this.usersService.findUserByFilter(query);
     if (candidate) {
       throw new CustomHttpException(
         ApiExceptions.UserAlreadyExist(),
