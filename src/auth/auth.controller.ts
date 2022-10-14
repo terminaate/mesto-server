@@ -6,6 +6,8 @@ import LoginUserDto from './dto/login-user.dto';
 
 @Controller('auth')
 class AuthController {
+  private refreshTokenExpires=86400000; // 1 day
+
   constructor(private authService: AuthService) {
   }
 
@@ -22,7 +24,7 @@ class AuthController {
       userDto.login ? userDto.login : userDto.email,
       userDto.password,
     );
-    res.cookie('refreshToken', refreshToken, { httpOnly: true });
+    res.cookie('refreshToken', refreshToken, { httpOnly: true, maxAge: this.refreshTokenExpires });
     res.json({ accessToken, user: newUser });
   }
 
@@ -36,7 +38,7 @@ class AuthController {
       refreshToken,
       user: newUser,
     } = await this.authService.register(userDto);
-    res.cookie('refreshToken', refreshToken, { httpOnly: true });
+    res.cookie('refreshToken', refreshToken, { httpOnly: true, maxAge: this.refreshTokenExpires });
     res.json({ accessToken, user: newUser });
   }
 
@@ -48,7 +50,7 @@ class AuthController {
     const { refreshToken } = req.cookies;
     const { accessToken: newAccessToken, refreshToken: newRefreshToken } =
       await this.authService.refresh(refreshToken);
-    res.cookie('refreshToken', newRefreshToken, { httpOnly: true });
+    res.cookie('refreshToken', newRefreshToken, { httpOnly: true, maxAge: this.refreshTokenExpires });
     res.json({ accessToken: newAccessToken });
   }
 
@@ -59,7 +61,7 @@ class AuthController {
       throw new ForbiddenException();
     }
     await this.authService.logout(refreshToken);
-    res.clearCookie('refreshToken', { httpOnly: true });
+    res.clearCookie('refreshToken', { httpOnly: true, maxAge: this.refreshTokenExpires });
     res.end();
   }
 }
