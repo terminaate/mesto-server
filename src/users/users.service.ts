@@ -18,8 +18,7 @@ class UsersService {
     private usersTokensModel: Model<UserTokenDocument>,
     private jwtService: JwtService,
     private filesService: FilesService,
-  ) {
-  }
+  ) {}
 
   async createNewUser(user: User): Promise<UserDocument> {
     return await this.usersModel.create(user);
@@ -45,14 +44,14 @@ class UsersService {
     const accessToken = this.jwtService.sign(
       { id: userId },
       {
-        expiresIn: '1h',
+        expiresIn: '1d',
         secret: process.env.JWT_ACCESS_SECRET,
       },
     );
     const refreshToken = this.jwtService.sign(
       { id: userId },
       {
-        expiresIn: '1d',
+        expiresIn: '30d',
         secret: process.env.JWT_REFRESH_SECRET,
       },
     );
@@ -120,7 +119,7 @@ class UsersService {
     const updatedFields: PatchUserDto = {};
     const newFields = { bio, password, username, email, login };
 
-    for (let i in newFields) {
+    for (const i in newFields) {
       if (newFields[i] && user[i] !== newFields[i]) {
         updatedFields[i] = newFields[i];
       }

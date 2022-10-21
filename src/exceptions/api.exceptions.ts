@@ -5,10 +5,6 @@ class ApiExceptions {
     this.message = message;
   }
 
-  private static NewException(message: string): string {
-    return new ApiExceptions(message).message;
-  }
-
   public static UserNotExist(): string {
     return this.NewException("Can't find a user with this data.");
   }
@@ -61,6 +57,10 @@ class ApiExceptions {
 
   public static PostAlreadyLiked(): string {
     return this.NewException('Post already liked.');
+  }
+
+  private static NewException(message: string): string {
+    return new ApiExceptions(message).message;
   }
 }
 

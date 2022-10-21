@@ -1,4 +1,11 @@
-import { Body, Controller, ForbiddenException, Post, Req, Res } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  ForbiddenException,
+  Post,
+  Req,
+  Res,
+} from '@nestjs/common';
 import RegisterUserDto from './dto/register-user.dto';
 import AuthService from './auth.service';
 import { Request, Response } from 'express';
@@ -6,10 +13,9 @@ import LoginUserDto from './dto/login-user.dto';
 
 @Controller('auth')
 class AuthController {
-  private refreshTokenExpires=86400000; // 1 day
+  private refreshTokenExpires = 2592000000; // 30 day
 
-  constructor(private authService: AuthService) {
-  }
+  constructor(private authService: AuthService) {}
 
   @Post('login')
   async login(
@@ -24,7 +30,10 @@ class AuthController {
       userDto.login ? userDto.login : userDto.email,
       userDto.password,
     );
-    res.cookie('refreshToken', refreshToken, { httpOnly: true, maxAge: this.refreshTokenExpires });
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      maxAge: this.refreshTokenExpires,
+    });
     res.json({ accessToken, user: newUser });
   }
 
@@ -38,7 +47,10 @@ class AuthController {
       refreshToken,
       user: newUser,
     } = await this.authService.register(userDto);
-    res.cookie('refreshToken', refreshToken, { httpOnly: true, maxAge: this.refreshTokenExpires });
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      maxAge: this.refreshTokenExpires,
+    });
     res.json({ accessToken, user: newUser });
   }
 
@@ -50,7 +62,10 @@ class AuthController {
     const { refreshToken } = req.cookies;
     const { accessToken: newAccessToken, refreshToken: newRefreshToken } =
       await this.authService.refresh(refreshToken);
-    res.cookie('refreshToken', newRefreshToken, { httpOnly: true, maxAge: this.refreshTokenExpires });
+    res.cookie('refreshToken', newRefreshToken, {
+      httpOnly: true,
+      maxAge: this.refreshTokenExpires,
+    });
     res.json({ accessToken: newAccessToken });
   }
 
@@ -61,7 +76,10 @@ class AuthController {
       throw new ForbiddenException();
     }
     await this.authService.logout(refreshToken);
-    res.clearCookie('refreshToken', { httpOnly: true, maxAge: this.refreshTokenExpires });
+    res.clearCookie('refreshToken', {
+      httpOnly: true,
+      maxAge: this.refreshTokenExpires,
+    });
     res.end();
   }
 }

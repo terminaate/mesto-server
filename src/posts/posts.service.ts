@@ -65,7 +65,7 @@ export class PostsService {
     const updatedFields: PatchPostDto = {};
     const newFields = { title, description };
 
-    for (let i in newFields) {
+    for (const i in newFields) {
       if (newFields[i] && post[i] !== newFields[i]) {
         updatedFields[i] = newFields[i];
       }

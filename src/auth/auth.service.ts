@@ -17,8 +17,7 @@ class AuthService {
     private usersService: UsersService,
     private filesService: FilesService,
     private rolesService: RolesService,
-  ) {
-  }
+  ) {}
 
   async login(ident: string, password: string) {
     const candidate = await this.usersService.findUserByFilter({
