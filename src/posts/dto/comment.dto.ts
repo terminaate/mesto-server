@@ -1,15 +1,17 @@
-class PostDto {
+class CommentDto {
   id: string;
   userId: string;
+  postId: string;
+  content: string;
   likes: string[];
-  comments: string[];
 
   constructor(model) {
     this.id = model.id;
     this.userId = model.userId;
+    this.postId = model.postId;
+    this.content = model.content;
     this.likes = model.likes;
-    this.comments = model.comments;
   }
 }
 
-export default PostDto;
+export default CommentDto;

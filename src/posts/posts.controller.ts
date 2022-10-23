@@ -51,4 +51,38 @@ export class PostsController {
   async likePost(@Req() { user }: UserRequest, @Param('id') id: string) {
     return this.postsService.likePost(id, user.id);
   }
+
+  @Post('/:id/comment')
+  async postComment(
+    @Req() { user }: UserRequest,
+    @Param('id') postId: string,
+    @Body('content') content: string,
+  ) {
+    return this.postsService.createPostComment({
+      postId,
+      userId: user.id,
+      content,
+    });
+  }
+
+  @Post('/:id/comments')
+  async getPostComments(@Param('id') postId: string) {
+    return this.postsService.getPostComments(postId);
+  }
+
+  @Post('/comment/:id/like')
+  async likeComment(
+    @Req() { user }: UserRequest,
+    @Param('id') commentId: string,
+  ) {
+    return this.postsService.likePostComment({
+      userId: user.id,
+      commentId,
+    });
+  }
+
+  @Post('/comment/:id')
+  async getComment(@Param('id') commentId: string) {
+    return this.postsService.getComment(commentId);
+  }
 }
