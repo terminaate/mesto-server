@@ -49,6 +49,10 @@ class ApiExceptions {
     return this.NewException('Post not founded.');
   }
 
+  public static CommentNotExist(): string {
+    return this.NewException('Comment not founded.');
+  }
+
   public static FileNotValid(): string {
     return this.NewException(
       'File size or file type is not valid. (file is a base64 string and max size its a 5 mb)',
