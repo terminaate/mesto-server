@@ -34,6 +34,7 @@ class AuthController {
       httpOnly: true,
       maxAge: this.refreshTokenExpires,
       secure: true,
+      sameSite: 'none',
     });
     res.json({ accessToken, user: newUser });
   }
