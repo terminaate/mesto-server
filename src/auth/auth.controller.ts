@@ -33,7 +33,6 @@ class AuthController {
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
       maxAge: this.refreshTokenExpires,
-      sameSite: 'none',
       secure: true,
     });
     res.json({ accessToken, user: newUser });
@@ -52,7 +51,7 @@ class AuthController {
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
       maxAge: this.refreshTokenExpires,
-      sameSite: 'none',
+      secure: true,
     });
     res.json({ accessToken, user: newUser });
   }
@@ -68,7 +67,7 @@ class AuthController {
     res.cookie('refreshToken', newRefreshToken, {
       httpOnly: true,
       maxAge: this.refreshTokenExpires,
-      sameSite: 'none',
+      secure: true,
     });
     res.json({ accessToken: newAccessToken });
   }
@@ -83,7 +82,7 @@ class AuthController {
     res.clearCookie('refreshToken', {
       httpOnly: true,
       maxAge: this.refreshTokenExpires,
-      sameSite: 'none',
+      secure: true,
     });
     res.end();
   }
