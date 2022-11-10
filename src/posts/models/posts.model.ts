@@ -6,18 +6,19 @@ class Post {
   @Prop({ type: Types.ObjectId, ref: 'User', required: true })
   userId: string;
 
-  @Prop({ type: String, required: true })
-  title: string;
-
-  @Prop({ type: String, required: false })
-  description: string;
-
   @Prop({
     type: [{ type: Types.ObjectId, ref: 'User', required: true }],
     required: true,
     default: [],
   })
   likes: string[];
+
+  @Prop({
+    type: [{ type: Types.ObjectId, ref: 'Comment', required: true }],
+    required: true,
+    default: [],
+  })
+  comments: string[];
 }
 
 export type PostDocument = Post & Document;
