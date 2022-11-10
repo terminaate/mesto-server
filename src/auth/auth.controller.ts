@@ -35,6 +35,7 @@ class AuthController {
       maxAge: this.refreshTokenExpires,
       sameSite: 'none',
       domain: JSON.parse(process.env.CLIENT_URL)[0],
+      secure: true,
     });
     res.json({ accessToken, user: newUser });
   }
