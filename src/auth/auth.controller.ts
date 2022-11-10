@@ -34,7 +34,6 @@ class AuthController {
       httpOnly: true,
       maxAge: this.refreshTokenExpires,
       sameSite: 'none',
-      domain: JSON.parse(process.env.CLIENT_URL)[0],
       secure: true,
     });
     res.json({ accessToken, user: newUser });
@@ -54,7 +53,6 @@ class AuthController {
       httpOnly: true,
       maxAge: this.refreshTokenExpires,
       sameSite: 'none',
-      domain: JSON.parse(process.env.CLIENT_URL)[0],
     });
     res.json({ accessToken, user: newUser });
   }
@@ -71,7 +69,6 @@ class AuthController {
       httpOnly: true,
       maxAge: this.refreshTokenExpires,
       sameSite: 'none',
-      domain: JSON.parse(process.env.CLIENT_URL)[0],
     });
     res.json({ accessToken: newAccessToken });
   }
@@ -87,7 +84,6 @@ class AuthController {
       httpOnly: true,
       maxAge: this.refreshTokenExpires,
       sameSite: 'none',
-      domain: JSON.parse(process.env.CLIENT_URL)[0],
     });
     res.end();
   }
