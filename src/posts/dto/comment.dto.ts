@@ -1,9 +1,9 @@
-class CommentDto {
-  id: string;
-  userId: string;
-  postId: string;
-  content: string;
-  likes: string[];
+export class CommentDTO {
+  public id: string;
+  public userId: string;
+  public postId: string;
+  public content: string;
+  public likes: string[];
 
   constructor(model) {
     this.id = model.id;
@@ -13,5 +13,3 @@ class CommentDto {
     this.likes = model.likes;
   }
 }
-
-export default CommentDto;

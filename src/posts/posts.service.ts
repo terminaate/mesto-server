@@ -1,19 +1,19 @@
-import { ForbiddenException, HttpStatus, Injectable } from '@nestjs/common';
-import PostDto from './dto/post.dto';
+import { ForbiddenException, Injectable } from '@nestjs/common';
+import { PostDTO } from './dto/post.dto';
 import { InjectModel } from '@nestjs/mongoose';
-import Post, { PostDocument } from './models/posts.model';
+import { Post, PostDocument } from './models/posts.model';
 import { Document, Model } from 'mongoose';
-import CreatePostDto from './dto/create-post.dto';
-import PatchPostDto from './dto/patch-post.dto';
-import Exception from '../exceptions/custom-http.exception';
-import ApiExceptions from '../exceptions/api.exceptions';
+import { PatchPostDTO } from './dto/patch-post.dto';
 import { UserDocument } from '../users/models/users.model';
-import FilesService from '../files/files.service';
-import UsersService from '../users/users.service';
-import Comment, { CommentDocument } from './models/comments.model';
-import CreateCommentDto from './dto/create-comment.dto';
-import CommentDto from './dto/comment.dto';
-import LikeCommentDto from './dto/like-comment.dto';
+import { FilesService } from '../files/files.service';
+import { Comment, CommentDocument } from './models/comments.model';
+import { CreateCommentDTO } from './dto/create-comment.dto';
+import { LikeCommentDTO } from './dto/like-comment.dto';
+import { PostsException } from './posts.exception';
+import { CreatePostDTO } from './dto/create-post.dto';
+import { UsersRepository } from '../users/users.repository';
+import { UsersException } from '../users/users.exception';
+import { CommentDTO } from './dto/comment.dto';
 
 @Injectable()
 export class PostsService {
@@ -21,45 +21,48 @@ export class PostsService {
     @InjectModel(Post.name) private postsModel: Model<PostDocument>,
     @InjectModel(Comment.name) private commentsModel: Model<CommentDocument>,
     private filesService: FilesService,
-    private usersService: UsersService,
+    private usersRepository: UsersRepository,
   ) {}
 
-  private async isPostExist(postId: string) {
+  private async isPostExist(postId: string): Promise<PostDocument> {
     if (!postId) {
-      throw new Exception(ApiExceptions.PostNotExist(), HttpStatus.BAD_REQUEST);
+      throw PostsException.PostNotExist();
     }
+
     const post = await this.postsModel.findById(postId);
     if (!post) {
-      throw new Exception(ApiExceptions.PostNotExist(), HttpStatus.BAD_REQUEST);
+      throw PostsException.PostNotExist();
     }
+
     return post;
   }
 
-  // TODO
-  // test this function
-  private async likeObject(model: Document & any, userId: string) {
+  private async likeObject(model: Document & any, userId: string): Promise<void> {
     if (model.likes.includes(userId)) {
       model.likes = model.likes.filter((id) => String(id) !== userId);
     } else {
       model.likes.push(userId);
     }
+
     await model.save();
   }
 
-  private async isCommentExist(commentId: string) {
+  private async isCommentExist(commentId: string): Promise<CommentDocument> {
     if (!commentId) {
-      throw new Exception(ApiExceptions.CommentNotExist(), HttpStatus.BAD_REQUEST);
+      throw PostsException.CommentNotExist();
     }
+
     const comment = await this.commentsModel.findById(commentId);
     if (!comment) {
-      throw new Exception(ApiExceptions.CommentNotExist(), HttpStatus.BAD_REQUEST);
+      throw PostsException.CommentNotExist();
     }
+
     return comment;
   }
 
-  public async createPost(postDto: CreatePostDto) {
-    if (!(await this.usersService.findUserByFilter({ _id: postDto.userId }))) {
-      throw new Exception(ApiExceptions.UserIdNotExist(), HttpStatus.BAD_REQUEST);
+  public async createPost(postDto: CreatePostDTO): Promise<PostDTO> {
+    if (!(await this.usersRepository.findUserById(postDto.userId))) {
+      throw UsersException.UserNotExist();
     }
 
     this.filesService.validateImage(postDto.image);
@@ -70,13 +73,13 @@ export class PostsService {
     this.filesService.createNewUserFolder(postDto.userId, '/posts');
     this.filesService.writePostImage(postDto.image, postDto.userId, newPost.id);
 
-    return new PostDto(newPost);
+    return new PostDTO(newPost);
   }
 
-  public async patchPost(postId: string, { image }: PatchPostDto, user: UserDocument) {
+  public async patchPost(postId: string, { image }: PatchPostDTO, user: UserDocument): Promise<PostDTO> {
     const post = await this.postsModel.findById(postId);
     if (!post) {
-      throw new Exception(ApiExceptions.PostNotExist(), HttpStatus.BAD_REQUEST);
+      throw PostsException.PostNotExist();
     }
 
     if (post.userId !== user.id && !user.roles.includes('ADMIN')) {
@@ -90,22 +93,22 @@ export class PostsService {
       }
     }
 
-    return new PostDto(post);
+    return new PostDTO(post);
   }
 
-  async findPostById(id: string) {
+  public async findPostById(id: string): Promise<PostDTO> {
     const post = await this.isPostExist(id);
-    return new PostDto(post);
+    return new PostDTO(post);
   }
 
-  async findUserPosts(userId: string) {
+  public async findUserPosts(userId: string): Promise<PostDTO[]> {
     if (!userId) {
-      throw new Exception(ApiExceptions.UserNotExist(), HttpStatus.BAD_REQUEST);
+      throw UsersException.UserNotExist();
     }
-    return (await this.postsModel.find({ userId })).map((post) => new PostDto(post)).reverse();
+    return (await this.postsModel.find({ userId })).map((post) => new PostDTO(post)).reverse();
   }
 
-  async deletePost(postId: string, user: UserDocument) {
+  public async deletePost(postId: string, user: UserDocument): Promise<PostDTO> {
     const post = await this.isPostExist(postId);
 
     if (post.userId !== user.id && !user.roles.includes('ADMIN')) {
@@ -113,16 +116,16 @@ export class PostsService {
     }
 
     await post.deleteOne();
-    return new PostDto(post);
+    return new PostDTO(post);
   }
 
-  async likePost(postId: string, userId: string) {
+  public async likePost(postId: string, userId: string): Promise<PostDTO> {
     const post = await this.isPostExist(postId);
     await this.likeObject(post, userId);
-    return new PostDto(post);
+    return new PostDTO(post);
   }
 
-  async createPostComment({ postId, userId, content }: CreateCommentDto) {
+  public async createPostComment({ postId, userId, content }: CreateCommentDTO): Promise<CommentDTO> {
     const post = await this.isPostExist(postId);
     const newComment = await this.commentsModel.create({
       userId,
@@ -131,17 +134,17 @@ export class PostsService {
     });
     post.comments.push(newComment.id);
     await post.save();
-    return new CommentDto(newComment);
+    return new CommentDTO(newComment);
   }
 
-  async likePostComment({ userId, commentId }: LikeCommentDto) {
+  public async likePostComment({ userId, commentId }: LikeCommentDTO): Promise<CommentDTO> {
     const comment = await this.isCommentExist(commentId);
     await this.likeObject(comment, userId);
-    return new CommentDto(comment);
+    return new CommentDTO(comment);
   }
 
-  async getComment(commentId: string) {
-    return await this.isCommentExist(commentId);
+  public async getComment(commentId: string): Promise<CommentDocument> {
+    return this.isCommentExist(commentId);
   }
 
   // async getUserComments(userId: string) {
@@ -152,14 +155,14 @@ export class PostsService {
   //     );
   //   }
   //   return (await this.commentsModel.find({ userId }))
-  //     .map((comment) => new CommentDto(comment))
+  //     .map((comment) => new CommentDTO(comment))
   //     .reverse();
   // }
 
-  async getPostComments(postId: string) {
+  public async getPostComments(postId: string): Promise<CommentDTO[]> {
     if (!postId) {
-      throw new Exception(ApiExceptions.PostNotExist(), HttpStatus.BAD_REQUEST);
+      throw PostsException.PostNotExist();
     }
-    return (await this.commentsModel.find({ postId })).map((comment) => new CommentDto(comment)).reverse();
+    return (await this.commentsModel.find({ postId })).map((comment) => new CommentDTO(comment)).reverse();
   }
 }

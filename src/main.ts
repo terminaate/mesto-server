@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { RequestMethod, ValidationPipe } from '@nestjs/common';
 import { json, urlencoded } from 'express';
+import * as process from 'process';
 const cookieParser = require('cookie-parser');
 
 async function bootstrap(): Promise<void> {
@@ -19,7 +20,7 @@ async function bootstrap(): Promise<void> {
   app.setGlobalPrefix('api', {
     exclude: [{ path: '/static/:path*', method: RequestMethod.GET }],
   });
-  app.use(cookieParser());
+  app.use(cookieParser(process.env.COOKIE_SECRET));
   app.use(json({ limit: '10mb' }));
   app.use(urlencoded({ extended: true, limit: '10mb' }));
 

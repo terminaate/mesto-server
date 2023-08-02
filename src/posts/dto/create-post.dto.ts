@@ -1,13 +1,11 @@
 import { IsNotEmpty, IsString } from 'class-validator';
 
-class CreatePostDto {
+export class CreatePostDTO {
   @IsString()
   @IsNotEmpty()
-  userId: string;
+  public userId: string;
 
   @IsNotEmpty()
   @IsString()
-  image: string;
+  public image: string;
 }
-
-export default CreatePostDto;

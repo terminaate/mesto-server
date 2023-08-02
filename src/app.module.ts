@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import AuthModule from './auth/auth.module';
+import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
 import { FilesModule } from './files/files.module';
 import { RolesModule } from './roles/roles.module';

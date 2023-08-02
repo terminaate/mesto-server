@@ -1,8 +1,12 @@
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
 import { PostsService } from './posts.service';
-import CreatePostDto from './dto/create-post.dto';
-import PatchPostDto from './dto/patch-post.dto';
-import JwtAuthGuard, { UserRequest } from '../auth/guards/jwt-auth.guard';
+import { PatchPostDTO } from './dto/patch-post.dto';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { UserRequest } from '../types/UserRequest';
+import { CreatePostDTO } from './dto/create-post.dto';
+import { PostDTO } from './dto/post.dto';
+import { CommentDTO } from './dto/comment.dto';
+import { Comment } from './models/comments.model';
 
 @UseGuards(JwtAuthGuard)
 @Controller('posts')
@@ -11,33 +15,33 @@ export class PostsController {
 
   @HttpCode(HttpStatus.CREATED)
   @Post('/')
-  async createNewPost(@Body() postDto: CreatePostDto) {
+  public async createNewPost(@Body() postDto: CreatePostDTO): Promise<PostDTO> {
     return this.postsService.createPost(postDto);
   }
 
   @HttpCode(HttpStatus.ACCEPTED)
   @Patch('/:id')
-  async patchPost(@Req() { user }: UserRequest, @Param('id') id: string, @Body() postDto: PatchPostDto) {
+  public async patchPost(@Req() { user }: UserRequest, @Param('id') id: string, @Body() postDto: PatchPostDTO): Promise<PostDTO> {
     return this.postsService.patchPost(id, postDto, user);
   }
 
   @Get('/:id')
-  async getPost(@Param('id') id: string) {
+  public async getPost(@Param('id') id: string): Promise<PostDTO> {
     return this.postsService.findPostById(id);
   }
 
   @Delete('/:id')
-  async deletePost(@Req() { user }: UserRequest, @Param('id') id: string) {
+  public async deletePost(@Req() { user }: UserRequest, @Param('id') id: string): Promise<PostDTO> {
     return this.postsService.deletePost(id, user);
   }
 
   @Post('/:id/like')
-  async likePost(@Req() { user }: UserRequest, @Param('id') id: string) {
+  public async likePost(@Req() { user }: UserRequest, @Param('id') id: string): Promise<PostDTO> {
     return this.postsService.likePost(id, user.id);
   }
 
   @Post('/:id/comment')
-  async postComment(@Req() { user }: UserRequest, @Param('id') postId: string, @Body('content') content: string) {
+  public async postComment(@Req() { user }: UserRequest, @Param('id') postId: string, @Body('content') content: string): Promise<CommentDTO> {
     return this.postsService.createPostComment({
       postId,
       userId: user.id,
@@ -46,12 +50,12 @@ export class PostsController {
   }
 
   @Post('/:id/comments')
-  async getPostComments(@Param('id') postId: string) {
+  public async getPostComments(@Param('id') postId: string): Promise<CommentDTO[]> {
     return this.postsService.getPostComments(postId);
   }
 
   @Post('/comment/:id/like')
-  async likeComment(@Req() { user }: UserRequest, @Param('id') commentId: string) {
+  public async likeComment(@Req() { user }: UserRequest, @Param('id') commentId: string): Promise<CommentDTO> {
     return this.postsService.likePostComment({
       userId: user.id,
       commentId,
@@ -59,7 +63,7 @@ export class PostsController {
   }
 
   @Post('/comment/:id')
-  async getComment(@Param('id') commentId: string) {
+  public async getComment(@Param('id') commentId: string): Promise<Comment> {
     return this.postsService.getComment(commentId);
   }
 }

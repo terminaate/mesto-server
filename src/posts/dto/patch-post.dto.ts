@@ -1,9 +1,7 @@
 import { IsOptional, IsString } from 'class-validator';
 
-class PatchPostDto {
+export class PatchPostDTO {
   @IsOptional()
   @IsString()
-  image?: string;
+  public image?: string;
 }
-
-export default PatchPostDto;

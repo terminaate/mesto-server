@@ -6,7 +6,7 @@ import { PatchUserDTO } from './dto/patch-user.dto';
 import { Roles } from '../roles/roles.decorator';
 import { PostsService } from '../posts/posts.service';
 import { UserDTO } from './dto/user.dto';
-import PostDto from '../posts/dto/post.dto';
+import { PostDTO } from '../posts/dto/post.dto';
 import { UserRequest } from '../types/UserRequest';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -57,7 +57,7 @@ export class UsersController {
   }
 
   @Get('/:id/posts')
-  public async getUserPosts(@Req() req: UserRequest, @Param('id') id: string): Promise<PostDto[]> {
+  public async getUserPosts(@Req() req: UserRequest, @Param('id') id: string): Promise<PostDTO[]> {
     const userId = (await this.usersService.getUserByIdent(id === '@me' ? req.user.id : id, false)).id;
     return this.postsService.findUserPosts(id === '@me' ? req.user.id : userId);
   }

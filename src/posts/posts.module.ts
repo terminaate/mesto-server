@@ -2,10 +2,10 @@ import { forwardRef, Module } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { PostsController } from './posts.controller';
 import { MongooseModule } from '@nestjs/mongoose';
-import Post, { PostSchema } from './models/posts.model';
-import FilesModule from '../files/files.module';
-import UsersModule from '../users/users.module';
-import Comment, { CommentSchema } from './models/comments.model';
+import { PostSchema, Post } from './models/posts.model';
+import { FilesModule } from '../files/files.module';
+import { UsersModule } from '../users/users.module';
+import { CommentSchema, Comment } from './models/comments.model';
 
 @Module({
   imports: [
