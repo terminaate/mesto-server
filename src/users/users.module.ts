@@ -1,12 +1,13 @@
 import { forwardRef, Module } from '@nestjs/common';
-import UsersController from './users.controller';
-import UsersService from './users.service';
+import { UsersController } from './users.controller';
+import { UsersService } from './users.service';
 import { MongooseModule } from '@nestjs/mongoose';
-import User, { UserSchema } from './models/users.model';
-import UserToken, { UserTokenSchema } from './models/users-tokens.model';
+import { User, UserSchema } from './models/users.model';
+import { UserToken, UserTokenSchema } from './models/users-tokens.model';
 import { JwtModule } from '@nestjs/jwt';
-import FilesModule from '../files/files.module';
+import { FilesModule } from '../files/files.module';
 import { PostsModule } from '../posts/posts.module';
+import { UsersRepository } from './users.repository';
 
 @Module({
   imports: [
@@ -19,9 +20,7 @@ import { PostsModule } from '../posts/posts.module';
     forwardRef(() => PostsModule),
   ],
   controllers: [UsersController],
-  providers: [UsersService],
-  exports: [UsersService],
+  providers: [UsersService, UsersRepository],
+  exports: [UsersService, UsersRepository],
 })
-class UsersModule {}
-
-export default UsersModule;
+export class UsersModule {}

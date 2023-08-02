@@ -1,5 +1,6 @@
-class CreateRoleDto {
-  value: string;
-}
+import { IsString } from 'class-validator';
 
-export default CreateRoleDto;
+export class CreateRoleDTO {
+  @IsString()
+  public value: string;
+}

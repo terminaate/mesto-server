@@ -1,64 +1,48 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import User, { UserDocument } from './models/users.model';
-import { Model, Types } from 'mongoose';
-import UserToken, { UserTokenDocument } from './models/users-tokens.model';
+import { Injectable } from '@nestjs/common';
+import { Types } from 'mongoose';
 import { JwtService } from '@nestjs/jwt';
-import ApiExceptions from '../exceptions/api.exceptions';
-import UserDto from './dto/user.dto';
-import CustomHttpException from '../exceptions/custom-http.exception';
-import PatchUserDto from './dto/patch-user.dto';
-import FilesService from '../files/files.service';
+import { UserDTO } from './dto/user.dto';
+import { FilesService } from '../files/files.service';
+import { UsersException } from './users.exception';
+import { PatchUserDTO } from './dto/patch-user.dto';
+import { UsersRepository } from './users.repository';
+import { Tokens } from './models/users-tokens.model';
 
 @Injectable()
-class UsersService {
+export class UsersService {
   constructor(
-    @InjectModel(User.name) private usersModel: Model<UserDocument>,
-    @InjectModel(UserToken.name)
-    private usersTokensModel: Model<UserTokenDocument>,
     private jwtService: JwtService,
     private filesService: FilesService,
+    private usersRepository: UsersRepository,
   ) {}
 
-  async createNewUser(user: User): Promise<UserDocument> {
-    return await this.usersModel.create(user);
-  }
-
-  async findUserByFilter(filter: Record<string, any>): Promise<UserDocument> {
-    return this.usersModel.findOne(filter);
-  }
-
-  async findUserTokens(userId: string): Promise<UserTokenDocument> {
-    return this.usersTokensModel.findOne({ userId });
-  }
-
-  async refreshUserTokens(refreshToken: string) {
-    const userTokens = await this.usersTokensModel.findOne({ refreshToken });
+  public async refreshUserTokens(refreshToken: string): Promise<Tokens> {
+    const userTokens = await this.usersRepository.findUserTokenByFilter({ refreshToken });
     if (!userTokens) {
       return null;
     }
-    return await this.generateUserTokens(userTokens.userId, true);
+    return this.generateUserTokens(userTokens.userId, true);
   }
 
-  async generateUserTokens(userId: string, save = false) {
+  public async generateUserTokens(userId: string, save = false): Promise<Tokens> {
     const accessToken = this.jwtService.sign(
       { id: userId },
       {
-        expiresIn: '1d',
+        expiresIn: process.env.JWT_ACCESS_LIFE_TIME,
         secret: process.env.JWT_ACCESS_SECRET,
       },
     );
     const refreshToken = this.jwtService.sign(
       { id: userId },
       {
-        expiresIn: '30d',
+        expiresIn: process.env.JWT_REFRESH_LIFE_TIME,
         secret: process.env.JWT_REFRESH_SECRET,
       },
     );
     if (save) {
-      const userTokens = await this.usersTokensModel.findOne({ userId });
+      const userTokens = await this.usersRepository.findUserTokenByUserId(userId);
       if (!userTokens) {
-        await this.usersTokensModel.create({
+        await this.usersRepository.createNewUserToken({
           userId,
           accessToken,
           refreshToken,
@@ -72,39 +56,29 @@ class UsersService {
     return { accessToken, refreshToken };
   }
 
-  async getUserByIdent(ident: string, isSelfUser: boolean) {
+  public async getUserByIdent(ident: string, isSelfUser: boolean): Promise<UserDTO> {
     const filter: { $or: Record<string, string>[] } = {
       $or: [{ username: ident }],
     };
     if (Types.ObjectId.isValid(ident)) {
       filter.$or.push({ _id: ident });
     }
-    const user = await this.usersModel.findOne(filter);
+    const user = await this.usersRepository.findUserByFilter(filter);
     if (!user) {
-      throw new CustomHttpException(
-        ApiExceptions.UserNotExist(),
-        HttpStatus.BAD_REQUEST,
-      );
+      throw UsersException.UserNotExist();
     }
-    return new UserDto(user, isSelfUser);
+    return new UserDTO(user, isSelfUser);
   }
 
-  async patchUser(
-    userId: string,
-    { avatar, bio, password, username, email, login }: PatchUserDto,
-  ) {
+  public async patchUser(userId: string, data: PatchUserDTO): Promise<UserDTO> {
     if (!userId) {
-      throw new CustomHttpException(
-        ApiExceptions.UserIdNotExist(),
-        HttpStatus.BAD_REQUEST,
-      );
+      throw UsersException.UserIdNotExist();
     }
-    const user = await this.usersModel.findById(userId);
+
+    const { avatar, ...patchUserDTO } = data;
+    const user = await this.usersRepository.findUserById(userId);
     if (!user) {
-      throw new CustomHttpException(
-        ApiExceptions.UserIdNotExist(),
-        HttpStatus.BAD_REQUEST,
-      );
+      throw UsersException.UserIdNotExist();
     }
 
     if (avatar) {
@@ -116,8 +90,8 @@ class UsersService {
       this.filesService.deleteUserAvatar(userId);
     }
 
-    const updatedFields: PatchUserDto = {};
-    const newFields = { bio, password, username, email, login };
+    const updatedFields: PatchUserDTO = {};
+    const newFields = { ...patchUserDTO };
 
     for (const i in newFields) {
       if (newFields[i] && user[i] !== newFields[i]) {
@@ -126,37 +100,26 @@ class UsersService {
     }
 
     await user.updateOne(updatedFields);
-    return { ...new UserDto(user), ...updatedFields };
+    return { ...new UserDTO(user), ...updatedFields };
   }
 
-  async deleteUser(userId: string) {
-    const user = await this.usersModel.findById(userId);
+  public async deleteUser(userId: string): Promise<UserDTO> {
+    const user = await this.usersRepository.findUserById(userId);
     if (!user) {
-      throw new CustomHttpException(
-        ApiExceptions.UserIdNotExist(),
-        HttpStatus.NOT_FOUND,
-      );
+      throw UsersException.UserIdNotExist();
     }
 
-    await this.usersTokensModel.deleteOne({ userId });
+    await this.usersRepository.deleteUserTokenByUserId(userId);
     await user.deleteOne();
 
     this.filesService.deleteUserFolder(userId);
-    return new UserDto(user);
+    return new UserDTO(user);
   }
 
-  async findUsersByFilter(filter: Record<string, any>) {
+  public async findUsersByFilter(filter: Record<string, any>): Promise<UserDTO[]> {
     if (Object.keys(filter).length <= 0) {
       return [];
     }
-    return (await this.usersModel.find(filter)).map(
-      (user) => new UserDto(user),
-    );
-  }
-
-  async findTokenByFilter(filter: Record<string, any>) {
-    return this.usersTokensModel.findOne(filter);
+    return (await this.usersRepository.findUsers(filter)).map((user) => new UserDTO(user));
   }
 }
-
-export default UsersService;

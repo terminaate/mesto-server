@@ -1,35 +1,22 @@
-import {
-  Body,
-  Controller,
-  ForbiddenException,
-  Post,
-  Req,
-  Res,
-} from '@nestjs/common';
-import RegisterUserDto from './dto/register-user.dto';
-import AuthService from './auth.service';
+import { Body, Controller, ForbiddenException, Post, Req, Res } from '@nestjs/common';
+import { RegisterUserDTO } from './dto/register-user.dto';
+import { AuthService } from './auth.service';
 import { Request, Response } from 'express';
-import LoginUserDto from './dto/login-user.dto';
+import { LoginUserDTO } from './dto/login-user.dto';
 
 @Controller('auth')
-class AuthController {
+export class AuthController {
   private refreshTokenExpires = 2592000000; // 30 day
 
   constructor(private authService: AuthService) {}
 
   @Post('login')
-  async login(
-    @Body() userDto: LoginUserDto,
-    @Res({ passthrough: true }) res: Response,
-  ) {
+  async login(@Body() userDto: LoginUserDTO, @Res({ passthrough: true }) res: Response) {
     const {
       accessToken,
       refreshToken,
       user: newUser,
-    } = await this.authService.login(
-      userDto.login ? userDto.login : userDto.email,
-      userDto.password,
-    );
+    } = await this.authService.login(userDto.login ? userDto.login : userDto.email, userDto.password);
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
       maxAge: this.refreshTokenExpires,
@@ -40,15 +27,8 @@ class AuthController {
   }
 
   @Post('register')
-  async register(
-    @Body() userDto: RegisterUserDto,
-    @Res({ passthrough: true }) res: Response,
-  ) {
-    const {
-      accessToken,
-      refreshToken,
-      user: newUser,
-    } = await this.authService.register(userDto);
+  async register(@Body() userDto: RegisterUserDTO, @Res({ passthrough: true }) res: Response) {
+    const { accessToken, refreshToken, user: newUser } = await this.authService.register(userDto);
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
       maxAge: this.refreshTokenExpires,
@@ -58,13 +38,9 @@ class AuthController {
   }
 
   @Post('refresh')
-  async refresh(
-    @Req() req: Request,
-    @Res({ passthrough: true }) res: Response,
-  ) {
+  async refresh(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
     const { refreshToken } = req.cookies;
-    const { accessToken: newAccessToken, refreshToken: newRefreshToken } =
-      await this.authService.refresh(refreshToken);
+    const { accessToken: newAccessToken, refreshToken: newRefreshToken } = await this.authService.refresh(refreshToken);
     res.cookie('refreshToken', newRefreshToken, {
       httpOnly: true,
       maxAge: this.refreshTokenExpires,
@@ -88,5 +64,3 @@ class AuthController {
     res.end();
   }
 }
-
-export default AuthController;

@@ -1,16 +1,4 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  HttpCode,
-  HttpStatus,
-  Param,
-  Patch,
-  Post,
-  Req,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import CreatePostDto from './dto/create-post.dto';
 import PatchPostDto from './dto/patch-post.dto';
@@ -29,11 +17,7 @@ export class PostsController {
 
   @HttpCode(HttpStatus.ACCEPTED)
   @Patch('/:id')
-  async patchPost(
-    @Req() { user }: UserRequest,
-    @Param('id') id: string,
-    @Body() postDto: PatchPostDto,
-  ) {
+  async patchPost(@Req() { user }: UserRequest, @Param('id') id: string, @Body() postDto: PatchPostDto) {
     return this.postsService.patchPost(id, postDto, user);
   }
 
@@ -53,11 +37,7 @@ export class PostsController {
   }
 
   @Post('/:id/comment')
-  async postComment(
-    @Req() { user }: UserRequest,
-    @Param('id') postId: string,
-    @Body('content') content: string,
-  ) {
+  async postComment(@Req() { user }: UserRequest, @Param('id') postId: string, @Body('content') content: string) {
     return this.postsService.createPostComment({
       postId,
       userId: user.id,
@@ -71,10 +51,7 @@ export class PostsController {
   }
 
   @Post('/comment/:id/like')
-  async likeComment(
-    @Req() { user }: UserRequest,
-    @Param('id') commentId: string,
-  ) {
+  async likeComment(@Req() { user }: UserRequest, @Param('id') commentId: string) {
     return this.postsService.likePostComment({
       userId: user.id,
       commentId,

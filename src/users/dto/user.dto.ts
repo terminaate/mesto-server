@@ -1,8 +1,8 @@
-class UserDto {
-  id: string;
-  email?: string;
-  username: string;
-  bio?: string;
+export class UserDTO {
+  public id: string;
+  public email?: string;
+  public username: string;
+  public bio?: string;
 
   constructor(model, isSelfUser = true) {
     this.id = model.id;
@@ -13,5 +13,3 @@ class UserDto {
     this.bio = model.bio;
   }
 }
-
-export default UserDto;

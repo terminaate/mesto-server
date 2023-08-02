@@ -2,31 +2,29 @@ import { Document, Types } from 'mongoose';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
 @Schema()
-class User {
+export class User {
   @Prop({ type: String })
-  email?: string;
+  public email?: string;
 
   @Prop({ type: String, required: true, unique: true })
-  login: string;
+  public login: string;
 
   @Prop({ type: String })
-  username: string;
+  public username: string;
 
   @Prop({ type: String })
-  bio?: string;
+  public bio?: string;
 
   @Prop({ type: String, required: true })
-  password: string;
+  public password: string;
 
   @Prop({
     type: [{ type: Types.ObjectId, required: true, ref: 'Role' }],
     required: true,
   })
-  roles: string[];
+  public roles: string[];
 }
 
 export type UserDocument = User & Document;
 
 export const UserSchema = SchemaFactory.createForClass(User);
-
-export default User;

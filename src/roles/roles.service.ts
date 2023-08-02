@@ -1,47 +1,41 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import Role, { RoleDocument } from './roles.model';
+import { Role, RoleDocument } from './models/roles.model';
 import { Model } from 'mongoose';
-import CreateRoleDto from './dto/create-role.dto';
-import CustomHttpException from '../exceptions/custom-http.exception';
-import ApiExceptions from '../exceptions/api.exceptions';
+import { CreateRoleDTO } from './dto/create-role.dto';
+import { RolesException } from './roles.exception';
 
 @Injectable()
-class RolesService {
+export class RolesService {
   constructor(@InjectModel(Role.name) private rolesModel: Model<RoleDocument>) {
-    this.rolesModel.findOne({ value: 'ADMIN' }).then((r) => {
-      if (!r) {
-        this.rolesModel.create({ value: 'ADMIN' });
-      }
-    });
-    this.rolesModel.findOne({ value: 'USER' }).then((r) => {
-      if (!r) {
-        this.rolesModel.create({ value: 'USER' });
-      }
-    });
+    void this.init();
   }
 
-  async getRoleByFilter(filter: { [key: string]: string } = { value: 'USER' }) {
+  private async init() {
+    await this.createInitialRole('ADMIN');
+    await this.createInitialRole('USER');
+  }
+
+  private async createInitialRole(value: string) {
+    const candidate = await this.rolesModel.findOne({ value });
+    if (!candidate) {
+      await this.rolesModel.create({ value });
+    }
+  }
+
+  public async getRoleByFilter(filter: { [key: string]: string } = { value: 'USER' }) {
     return this.rolesModel.findOne(filter);
   }
 
-  async createRole({ value: newRoleValue }: CreateRoleDto) {
+  public async createRole({ value: newRoleValue }: CreateRoleDTO) {
     if (!newRoleValue) {
-      throw new CustomHttpException(
-        ApiExceptions.RoleValueEmpty(),
-        HttpStatus.BAD_REQUEST,
-      );
+      throw RolesException.RoleValueEmpty();
     }
 
     const candidate = await this.rolesModel.findOne({ value: newRoleValue });
     if (candidate) {
-      throw new CustomHttpException(
-        ApiExceptions.RoleAlreadyExit(),
-        HttpStatus.BAD_REQUEST,
-      );
+      throw RolesException.RoleAlreadyExit();
     }
     return this.rolesModel.create({ value: newRoleValue });
   }
 }
-
-export default RolesService;

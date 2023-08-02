@@ -1,13 +1,12 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import * as fs from 'fs';
 import * as path from 'path';
-import CustomHttpException from 'src/exceptions/custom-http.exception';
-import ApiExceptions from '../exceptions/api.exceptions';
+import { FilesException } from './files.exception';
+import { UsersException } from '../users/users.exception';
 
 @Injectable()
-class FilesService {
-  private readonly rootPath: string =
-    path.resolve(__dirname, '../') + '/static';
+export class FilesService {
+  private readonly rootPath: string = path.resolve(__dirname, '../') + '/static';
 
   constructor() {
     this.createStaticFolder();
@@ -31,11 +30,7 @@ class FilesService {
       fs.rm(this.rootPath + `${path}/${foundFile}`, () => {});
     }
 
-    fs.writeFile(
-      this.rootPath + `${path}/${fileName}.${fileExt[1]}`,
-      decodedImage.data,
-      () => {},
-    );
+    fs.writeFile(this.rootPath + `${path}/${fileName}.${fileExt[1]}`, decodedImage.data, () => {});
   }
 
   public getFileSize(imageBase: string) {
@@ -50,23 +45,15 @@ class FilesService {
 
     const imageExt = this.getFileExt(image).split('/');
     const imageSize = this.getFileSize(image);
-    const isImageBase64 =
-      (image && this.isStringBase64(image)) || imageExt[0] === 'image';
+    const isImageBase64 = (image && this.isStringBase64(image)) || imageExt[0] === 'image';
     if (!isImageBase64) {
-      throw new CustomHttpException(
-        ApiExceptions.FileNotBase64(),
-        HttpStatus.BAD_REQUEST,
-      );
+      throw FilesException.FileNotBase64();
     }
     const isImageSizeValid =
       (imageSize !== 'n/a' && Object.keys(imageSize).includes('kb')) ||
-      (Object.keys(imageSize).includes('mb') &&
-        (imageSize as Record<string, number>).mb < 5);
+      (Object.keys(imageSize).includes('mb') && (imageSize as Record<string, number>).mb < 5);
     if (!isImageSizeValid) {
-      throw new CustomHttpException(
-        ApiExceptions.TooLargeFileSize(),
-        HttpStatus.BAD_REQUEST,
-      );
+      throw FilesException.TooLargeFileSize();
     }
     return imageExt;
   }
@@ -84,10 +71,7 @@ class FilesService {
       const foundFile = this.findFileWithName(this.rootPath + path, fileName);
       fs.rmSync(this.rootPath + `${path}/${foundFile}`);
     } catch (e) {
-      throw new CustomHttpException(
-        ApiExceptions.FileNotFound(),
-        HttpStatus.BAD_REQUEST,
-      );
+      throw FilesException.FileNotFound();
     }
   }
 
@@ -99,10 +83,7 @@ class FilesService {
     try {
       fs.rmdirSync(this.rootPath + `/${userId}`);
     } catch (e) {
-      throw new CustomHttpException(
-        ApiExceptions.UserIdNotExist(),
-        HttpStatus.BAD_REQUEST,
-      );
+      throw UsersException.UserIdNotExist();
     }
   }
 
@@ -165,5 +146,3 @@ class FilesService {
     }
   }
 }
-
-export default FilesService;

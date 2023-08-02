@@ -5,7 +5,7 @@ import Post, { PostDocument } from './models/posts.model';
 import { Document, Model } from 'mongoose';
 import CreatePostDto from './dto/create-post.dto';
 import PatchPostDto from './dto/patch-post.dto';
-import CustomHttpException from '../exceptions/custom-http.exception';
+import Exception from '../exceptions/custom-http.exception';
 import ApiExceptions from '../exceptions/api.exceptions';
 import { UserDocument } from '../users/models/users.model';
 import FilesService from '../files/files.service';
@@ -26,17 +26,11 @@ export class PostsService {
 
   private async isPostExist(postId: string) {
     if (!postId) {
-      throw new CustomHttpException(
-        ApiExceptions.PostNotExist(),
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new Exception(ApiExceptions.PostNotExist(), HttpStatus.BAD_REQUEST);
     }
     const post = await this.postsModel.findById(postId);
     if (!post) {
-      throw new CustomHttpException(
-        ApiExceptions.PostNotExist(),
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new Exception(ApiExceptions.PostNotExist(), HttpStatus.BAD_REQUEST);
     }
     return post;
   }
@@ -54,27 +48,18 @@ export class PostsService {
 
   private async isCommentExist(commentId: string) {
     if (!commentId) {
-      throw new CustomHttpException(
-        ApiExceptions.CommentNotExist(),
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new Exception(ApiExceptions.CommentNotExist(), HttpStatus.BAD_REQUEST);
     }
     const comment = await this.commentsModel.findById(commentId);
     if (!comment) {
-      throw new CustomHttpException(
-        ApiExceptions.CommentNotExist(),
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new Exception(ApiExceptions.CommentNotExist(), HttpStatus.BAD_REQUEST);
     }
     return comment;
   }
 
   public async createPost(postDto: CreatePostDto) {
     if (!(await this.usersService.findUserByFilter({ _id: postDto.userId }))) {
-      throw new CustomHttpException(
-        ApiExceptions.UserIdNotExist(),
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new Exception(ApiExceptions.UserIdNotExist(), HttpStatus.BAD_REQUEST);
     }
 
     this.filesService.validateImage(postDto.image);
@@ -88,17 +73,10 @@ export class PostsService {
     return new PostDto(newPost);
   }
 
-  public async patchPost(
-    postId: string,
-    { image }: PatchPostDto,
-    user: UserDocument,
-  ) {
+  public async patchPost(postId: string, { image }: PatchPostDto, user: UserDocument) {
     const post = await this.postsModel.findById(postId);
     if (!post) {
-      throw new CustomHttpException(
-        ApiExceptions.PostNotExist(),
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new Exception(ApiExceptions.PostNotExist(), HttpStatus.BAD_REQUEST);
     }
 
     if (post.userId !== user.id && !user.roles.includes('ADMIN')) {
@@ -122,14 +100,9 @@ export class PostsService {
 
   async findUserPosts(userId: string) {
     if (!userId) {
-      throw new CustomHttpException(
-        ApiExceptions.UserNotExist(),
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new Exception(ApiExceptions.UserNotExist(), HttpStatus.BAD_REQUEST);
     }
-    return (await this.postsModel.find({ userId }))
-      .map((post) => new PostDto(post))
-      .reverse();
+    return (await this.postsModel.find({ userId })).map((post) => new PostDto(post)).reverse();
   }
 
   async deletePost(postId: string, user: UserDocument) {
@@ -174,7 +147,7 @@ export class PostsService {
   // async getUserComments(userId: string) {
   //   if (!userId) {
   //     throw new CustomHttpException(
-  //       ApiExceptions.UserIdNotExist(),
+  //       UsersExceptions.UserIdNotExist(),
   //       HttpStatus.BAD_REQUEST,
   //     );
   //   }
@@ -185,13 +158,8 @@ export class PostsService {
 
   async getPostComments(postId: string) {
     if (!postId) {
-      throw new CustomHttpException(
-        ApiExceptions.PostNotExist(),
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new Exception(ApiExceptions.PostNotExist(), HttpStatus.BAD_REQUEST);
     }
-    return (await this.commentsModel.find({ postId }))
-      .map((comment) => new CommentDto(comment))
-      .reverse();
+    return (await this.commentsModel.find({ postId })).map((comment) => new CommentDto(comment)).reverse();
   }
 }

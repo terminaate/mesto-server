@@ -1,15 +1,25 @@
-import { HttpException } from '@nestjs/common';
+import { HttpException, HttpStatus } from '@nestjs/common';
 
-class CustomHttpException extends HttpException {
-  constructor(message: string | string[], status: number) {
+export class CustomHttpException extends HttpException {
+  constructor(message: string | string[], statusCode: number) {
     super(
       {
-        statusCode: status,
+        statusCode,
         message: Array.isArray(message) ? [...message] : [message],
       },
-      status,
+      statusCode,
     );
   }
-}
 
-export default CustomHttpException;
+  public static UnauthorizedException() {
+    return new CustomHttpException('Unauthorized.', HttpStatus.UNAUTHORIZED);
+  }
+
+  public static ForbiddenException() {
+    return new CustomHttpException('Forbidden.', HttpStatus.FORBIDDEN);
+  }
+
+  public static InternalServerError() {
+    return new CustomHttpException('Internal Server Error', HttpStatus.INTERNAL_SERVER_ERROR);
+  }
+}

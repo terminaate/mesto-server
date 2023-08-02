@@ -2,17 +2,18 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { RequestMethod, ValidationPipe } from '@nestjs/common';
 import { json, urlencoded } from 'express';
-
 const cookieParser = require('cookie-parser');
 
-async function bootstrap() {
+async function bootstrap(): Promise<void> {
   const PORT = process.env.PORT || 3000;
+
   const app = await NestFactory.create(AppModule, {
     cors: {
       origin: JSON.parse(process.env.CLIENT_URL),
       credentials: true,
     },
   });
+
   // Use global validation
   app.useGlobalPipes(new ValidationPipe());
   app.setGlobalPrefix('api', {
@@ -21,9 +22,8 @@ async function bootstrap() {
   app.use(cookieParser());
   app.use(json({ limit: '10mb' }));
   app.use(urlencoded({ extended: true, limit: '10mb' }));
-  await app.listen(PORT, () =>
-    console.log(`Server listening on http://127.0.0.1:${PORT}`),
-  );
+
+  await app.listen(PORT, () => console.log(`Server listening on http://127.0.0.1:${PORT}`));
 }
 
-bootstrap();
+void bootstrap();

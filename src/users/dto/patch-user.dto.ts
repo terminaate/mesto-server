@@ -1,43 +1,34 @@
-import {
-  IsEmail,
-  IsNotEmpty,
-  IsOptional,
-  IsString,
-  MaxLength,
-  MinLength,
-} from 'class-validator';
+import { IsEmail, IsNotEmpty, IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
 
-class PatchUserDto {
+export class PatchUserDTO {
   @IsOptional()
   @IsString()
   @MinLength(4)
   @MaxLength(20)
-  login?: string;
+  public login?: string;
 
   @IsOptional()
   @IsEmail()
-  email?: string;
+  public email?: string;
 
   @IsOptional()
   @IsString()
   @MinLength(4)
   @MaxLength(20)
-  username?: string;
+  public username?: string;
 
   @IsOptional()
   @IsString()
   @MinLength(1)
   @MaxLength(40)
-  bio?: string;
+  public bio?: string;
 
   @IsOptional()
   @IsString()
-  avatar?: string;
+  public avatar?: string;
 
   @IsOptional()
   @IsNotEmpty()
   @MinLength(7)
-  password?: string;
+  public password?: string;
 }
-
-export default PatchUserDto;
