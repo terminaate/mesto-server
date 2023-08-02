@@ -1,12 +1,13 @@
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { Inject } from '@nestjs/common';
-import { UsersService } from '../../users/users.service';
 import { RolesService } from '../../roles/roles.service';
+import { UserDocument } from '../../users/models/users.model';
+import { UsersRepository } from '../../users/users.repository';
 
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(
-    @Inject(UsersService) private usersService: UsersService,
+    @Inject(UsersRepository) private usersRepository: UsersRepository,
     @Inject(RolesService) private rolesService: RolesService,
   ) {
     super({
@@ -16,8 +17,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  public async validate(payload: { id: string }) {
-    const user = await this.usersService.findUserByFilter({ _id: payload.id });
+  public async validate(payload: { id: string }): Promise<UserDocument> {
+    const user = await this.usersRepository.findUserById(payload.id);
     user.roles = await Promise.all(user.roles.map(async (role) => (await this.rolesService.getRoleByFilter({ _id: role })).value));
     return user;
   }

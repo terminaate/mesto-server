@@ -11,15 +11,15 @@ export class CustomHttpException extends HttpException {
     );
   }
 
-  public static UnauthorizedException() {
+  public static UnauthorizedException(): CustomHttpException {
     return new CustomHttpException('Unauthorized.', HttpStatus.UNAUTHORIZED);
   }
 
-  public static ForbiddenException() {
+  public static ForbiddenException(): CustomHttpException {
     return new CustomHttpException('Forbidden.', HttpStatus.FORBIDDEN);
   }
 
-  public static InternalServerError() {
+  public static InternalServerError(): CustomHttpException {
     return new CustomHttpException('Internal Server Error', HttpStatus.INTERNAL_SERVER_ERROR);
   }
 }

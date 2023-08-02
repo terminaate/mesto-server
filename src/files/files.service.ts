@@ -4,6 +4,8 @@ import * as path from 'path';
 import { FilesException } from './files.exception';
 import { UsersException } from '../users/users.exception';
 
+type BytesToSizeReturnType = 'n/a' | Record<string, number | string>;
+
 @Injectable()
 export class FilesService {
   private readonly rootPath: string = path.resolve(__dirname, '../') + '/static';
@@ -12,16 +14,16 @@ export class FilesService {
     this.createStaticFolder();
   }
 
-  public createNewUserFolder(userId: string, path = '') {
+  public createNewUserFolder(userId: string, path = ''): void {
     const userPath = this.rootPath + `/${userId}${path}`;
     fs.mkdir(userPath, () => {});
   }
 
-  public getFileExt(imageBase: string) {
+  public getFileExt(imageBase: string): string {
     return imageBase.substring('data:'.length, imageBase.indexOf(';base64'));
   }
 
-  public writeFile(image: string, path: string, fileName: string) {
+  public writeFile(image: string, path: string, fileName: string): void {
     const fileExt = this.getFileExt(image).split('/');
     const decodedImage = this.decodeBase64(image);
     const foundFile = this.findFileWithName(this.rootPath + path, fileName);
@@ -33,14 +35,14 @@ export class FilesService {
     fs.writeFile(this.rootPath + `${path}/${fileName}.${fileExt[1]}`, decodedImage.data, () => {});
   }
 
-  public getFileSize(imageBase: string) {
+  public getFileSize(imageBase: string): BytesToSizeReturnType {
     const base64str = imageBase.substring(imageBase.indexOf(',') + 1);
     const decoded = atob(base64str);
 
     return this.bytesToSize(decoded.length);
   }
 
-  public validateImage(image: string) {
+  public validateImage(image: string): string[] {
     if (image === null) return null;
 
     const imageExt = this.getFileExt(image).split('/');
@@ -58,15 +60,15 @@ export class FilesService {
     return imageExt;
   }
 
-  public writeUserAvatar(userId: string, imageBase: string) {
+  public writeUserAvatar(userId: string, imageBase: string): void {
     this.writeFile(imageBase, `/${userId}`, 'avatar');
   }
 
-  public isStringBase64(imageBase: string) {
+  public isStringBase64(imageBase: string): boolean {
     return Boolean(this.decodeBase64(imageBase));
   }
 
-  public deleteFile(path: string, fileName: string) {
+  public deleteFile(path: string, fileName: string): void {
     try {
       const foundFile = this.findFileWithName(this.rootPath + path, fileName);
       fs.rmSync(this.rootPath + `${path}/${foundFile}`);
@@ -75,11 +77,11 @@ export class FilesService {
     }
   }
 
-  public deleteUserAvatar(userId: string) {
+  public deleteUserAvatar(userId: string): void {
     this.deleteFile(`/${userId}`, 'avatar');
   }
 
-  public deleteUserFolder(userId: string) {
+  public deleteUserFolder(userId: string): void {
     try {
       fs.rmdirSync(this.rootPath + `/${userId}`);
     } catch (e) {
@@ -87,11 +89,11 @@ export class FilesService {
     }
   }
 
-  public writePostImage(image: string, userId: string, postId: string) {
+  public writePostImage(image: string, userId: string, postId: string): void {
     this.writeFile(image, `/${userId}/posts`, postId);
   }
 
-  private isStaticFolderExist() {
+  private isStaticFolderExist(): boolean {
     try {
       return Boolean(fs.readdirSync(this.rootPath));
     } catch (e) {
@@ -99,13 +101,13 @@ export class FilesService {
     }
   }
 
-  private createStaticFolder() {
+  private createStaticFolder(): void {
     if (!this.isStaticFolderExist()) {
       fs.mkdir(this.rootPath, () => {});
     }
   }
 
-  private bytesToSize(bytes: number) {
+  private bytesToSize(bytes: number): BytesToSizeReturnType {
     const sizes = ['bytes', 'kb', 'mb', 'gb', 'tb'];
 
     if (bytes === 0) {
@@ -121,7 +123,7 @@ export class FilesService {
     return { [sizes[i]]: (bytes / Math.pow(1024, i)).toFixed(1) };
   }
 
-  private decodeBase64(dataString: string) {
+  private decodeBase64(dataString: string): { data: Buffer; type: string } {
     const matches = dataString.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
     if (!matches || matches.length !== 3) {
       return null;

@@ -9,7 +9,7 @@ export class RolesGuard implements CanActivate {
     private readonly reflector: Reflector,
   ) {}
 
-  public async canActivate(context: ExecutionContext) {
+  public async canActivate(context: ExecutionContext): Promise<boolean> {
     const metaRoles = this.reflector.get<string[]>('roles', context.getHandler());
     if (!metaRoles) {
       return true;

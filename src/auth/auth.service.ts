@@ -7,17 +7,26 @@ import { FilesService } from '../files/files.service';
 import { RolesService } from '../roles/roles.service';
 import { AuthException } from './auth.exception';
 import { UsersException } from '../users/users.exception';
+import { UsersRepository } from '../users/users.repository';
+import { Tokens } from '../users/models/users-tokens.model';
+
+type AuthFunctionsReturnType = {
+  accessToken: string;
+  refreshToken: string;
+  user: UserDTO;
+};
 
 @Injectable()
 export class AuthService {
   constructor(
     private usersService: UsersService,
+    private usersRepository: UsersRepository,
     private filesService: FilesService,
     private rolesService: RolesService,
   ) {}
 
-  public async login(ident: string, password: string) {
-    const candidate = await this.usersService.findUserByFilter({
+  public async login(ident: string, password: string): Promise<AuthFunctionsReturnType> {
+    const candidate = await this.usersRepository.findUserByFilter({
       $or: [{ email: ident }, { login: ident }],
     });
     if (!candidate) {
@@ -33,8 +42,8 @@ export class AuthService {
     return { ...userTokens, user: new UserDTO(candidate) };
   }
 
-  public async register(userDto: RegisterUserDTO) {
-    const candidate = await this.usersService.findUserByFilter({
+  public async register(userDto: RegisterUserDTO): Promise<AuthFunctionsReturnType> {
+    const candidate = await this.usersRepository.findUserByFilter({
       login: userDto.login,
       email: userDto.email,
     });
@@ -44,7 +53,7 @@ export class AuthService {
 
     const userRole = await this.rolesService.getRoleByFilter();
     const hashedPassword = await argon2.hash(userDto.password);
-    const newUser = await this.usersService.createNewUser({
+    const newUser = await this.usersRepository.createNewUser({
       login: userDto.login,
       username: userDto.login,
       email: userDto.email ?? null,
@@ -58,7 +67,7 @@ export class AuthService {
     return { ...userTokens, user: new UserDTO(newUser) };
   }
 
-  public async refresh(refreshToken: string) {
+  public async refresh(refreshToken: string): Promise<Tokens> {
     if (!refreshToken) {
       throw UsersException.UserNotExist();
     }
@@ -71,13 +80,11 @@ export class AuthService {
     return userTokens;
   }
 
-  public async logout(refreshToken: string) {
-    // LMAO
-    // In this method im doing ref to another service xD
-    const token = await this.usersService.findTokenByFilter({ refreshToken });
+  public async logout(refreshToken: string): Promise<void> {
+    const token = await this.usersRepository.findUserTokenByFilter({ refreshToken });
     if (!token) {
       throw new ForbiddenException();
     }
-    await token.delete();
+    await token.deleteOne();
   }
 }

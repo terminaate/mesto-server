@@ -11,23 +11,23 @@ export class RolesService {
     void this.init();
   }
 
-  private async init() {
+  private async init(): Promise<void> {
     await this.createInitialRole('ADMIN');
     await this.createInitialRole('USER');
   }
 
-  private async createInitialRole(value: string) {
+  private async createInitialRole(value: string): Promise<void> {
     const candidate = await this.rolesModel.findOne({ value });
     if (!candidate) {
       await this.rolesModel.create({ value });
     }
   }
 
-  public async getRoleByFilter(filter: { [key: string]: string } = { value: 'USER' }) {
+  public async getRoleByFilter(filter: { [key: string]: string } = { value: 'USER' }): Promise<RoleDocument> {
     return this.rolesModel.findOne(filter);
   }
 
-  public async createRole({ value: newRoleValue }: CreateRoleDTO) {
+  public async createRole({ value: newRoleValue }: CreateRoleDTO): Promise<RoleDocument> {
     if (!newRoleValue) {
       throw RolesException.RoleValueEmpty();
     }
