@@ -1,4 +1,4 @@
-import { CustomHttpException } from '../exceptions/custom-http.exception';
+import { CustomHttpException } from '../common/exceptions/custom-http.exception';
 import { HttpStatus } from '@nestjs/common';
 
 export class AuthException {

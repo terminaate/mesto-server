@@ -1,106 +1,55 @@
 import { Injectable } from '@nestjs/common';
 import { Types } from 'mongoose';
-import { JwtService } from '@nestjs/jwt';
 import { UserDTO } from './dto/user.dto';
 import { FilesService } from '../files/files.service';
 import { UsersException } from './users.exception';
 import { PatchUserDTO } from './dto/patch-user.dto';
 import { UsersRepository } from './users.repository';
-import { Tokens } from './models/users-tokens.model';
+import { OrFilter } from '../common/types/OrFilter';
 
 @Injectable()
 export class UsersService {
   constructor(
-    private jwtService: JwtService,
     private filesService: FilesService,
     private usersRepository: UsersRepository,
   ) {}
 
-  public async refreshUserTokens(refreshToken: string): Promise<Tokens> {
-    const userTokens = await this.usersRepository.findUserTokenByFilter({ refreshToken });
-    if (!userTokens) {
-      return null;
-    }
-    return this.generateUserTokens(userTokens.userId, true);
-  }
-
-  public async generateUserTokens(userId: string, save = false): Promise<Tokens> {
-    const accessToken = this.jwtService.sign(
-      { id: userId },
-      {
-        expiresIn: process.env.JWT_ACCESS_LIFE_TIME,
-        secret: process.env.JWT_ACCESS_SECRET,
-      },
-    );
-    const refreshToken = this.jwtService.sign(
-      { id: userId },
-      {
-        expiresIn: process.env.JWT_REFRESH_LIFE_TIME,
-        secret: process.env.JWT_REFRESH_SECRET,
-      },
-    );
-    if (save) {
-      const userTokens = await this.usersRepository.findUserTokenByUserId(userId);
-      if (!userTokens) {
-        await this.usersRepository.createNewUserToken({
-          userId,
-          accessToken,
-          refreshToken,
-        });
-      } else {
-        userTokens.accessToken = accessToken;
-        userTokens.refreshToken = refreshToken;
-        await userTokens.save();
-      }
-    }
-    return { accessToken, refreshToken };
-  }
-
-  public async getUserByIdent(ident: string, isSelfUser: boolean): Promise<UserDTO> {
-    const filter: { $or: Record<string, string>[] } = {
+  public async getUserByIdent(ident: string): Promise<UserDTO> {
+    const filter: OrFilter = {
       $or: [{ username: ident }],
     };
     if (Types.ObjectId.isValid(ident)) {
       filter.$or.push({ _id: ident });
     }
+
     const user = await this.usersRepository.findUserByFilter(filter);
     if (!user) {
       throw UsersException.UserNotExist();
     }
-    return new UserDTO(user, isSelfUser);
+
+    return new UserDTO(user);
   }
 
-  public async patchUser(userId: string, data: PatchUserDTO): Promise<UserDTO> {
+  public async patchUser(userId: string, patchUserDTO: PatchUserDTO): Promise<UserDTO> {
     if (!userId) {
       throw UsersException.UserIdNotExist();
     }
 
-    const { avatar, ...patchUserDTO } = data;
     const user = await this.usersRepository.findUserById(userId);
     if (!user) {
       throw UsersException.UserIdNotExist();
     }
 
-    if (avatar) {
-      const isAvatarValid = this.filesService.validateImage(avatar);
-      if (isAvatarValid) {
-        this.filesService.writeUserAvatar(userId, avatar);
-      }
-    } else if (avatar === null) {
+    if (patchUserDTO.avatar && this.filesService.validateImage(patchUserDTO.avatar)) {
+      this.filesService.writeUserAvatar(userId, patchUserDTO.avatar);
+      patchUserDTO.avatar = `/static/${userId}/avatar`;
+    } else if (patchUserDTO.avatar === null) {
       this.filesService.deleteUserAvatar(userId);
+      patchUserDTO.avatar = null;
     }
 
-    const updatedFields: PatchUserDTO = {};
-    const newFields = { ...patchUserDTO };
-
-    for (const i in newFields) {
-      if (newFields[i] && user[i] !== newFields[i]) {
-        updatedFields[i] = newFields[i];
-      }
-    }
-
-    await user.updateOne(updatedFields);
-    return { ...new UserDTO(user), ...updatedFields };
+    await user.updateOne(patchUserDTO);
+    return { ...new UserDTO(user), ...patchUserDTO };
   }
 
   public async deleteUser(userId: string): Promise<UserDTO> {
@@ -116,10 +65,10 @@ export class UsersService {
     return new UserDTO(user);
   }
 
-  public async findUsersByFilter(filter: Record<string, any>): Promise<UserDTO[]> {
-    if (Object.keys(filter).length <= 0) {
+  public async findUsersByUserName(username: string): Promise<UserDTO[]> {
+    if (!username) {
       return [];
     }
-    return (await this.usersRepository.findUsers(filter)).map((user) => new UserDTO(user));
+    return (await this.usersRepository.findUsers({ username: new RegExp(username, 'i') })).map((user) => new UserDTO(user));
   }
 }

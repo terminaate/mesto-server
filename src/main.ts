@@ -3,7 +3,11 @@ import { AppModule } from './app.module';
 import { RequestMethod, ValidationPipe } from '@nestjs/common';
 import { json, urlencoded } from 'express';
 import * as process from 'process';
+
 const cookieParser = require('cookie-parser');
+
+// TODO
+// refactor posts and roles module
 
 async function bootstrap(): Promise<void> {
   const PORT = process.env.PORT || 3000;
@@ -16,7 +20,7 @@ async function bootstrap(): Promise<void> {
   });
 
   // Use global validation
-  app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalPipes(new ValidationPipe({ transform: true }));
   app.setGlobalPrefix('api', {
     exclude: [{ path: '/static/:path*', method: RequestMethod.GET }],
   });
